@@ -7,9 +7,8 @@
 
 {% block content %}
 
-{% if user.is_authenticated %}
-<h1>Welcome, {{ user.username }}</h1>
-{% else %}
+<!-- Hero Section - показується тільки для неавторизованих -->
+{% if not user.is_authenticated %}
 <section class="hero">
     <div class="hero-content">
         <h1>Знайди музику до своєї улюбленої книги</h1>
@@ -21,6 +20,7 @@
 </section>
 {% endif %}
 
+<!-- Search Section -->
 <section class="search-section">
     <div class="search-box">
         <div class="search-input-group">
@@ -37,8 +37,9 @@
     </div>
 </section>
 
+<!-- Books Catalog -->
 <section class="container" id="catalog">
-    <h2 class="section-title">{{ section_title }}</h2>
+    <h2 class="section-title">{{ books_section_title }}</h2>
 
     <div class="books-grid">
         {% for book in books %}
@@ -55,14 +56,13 @@
 
 <!-- Popular Music -->
 <section class="container">
-    <h2 class="section-title">{{ section_title }}</h2>
+    <h2 class="section-title">{{ music_section_title }}</h2>
     <div class="music-list">
         {% for music in popular_music %}
         <div class="music-item">
             <div class="music-cover">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     class="lucide lucide-music-icon lucide-music">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M9 18V5l12-2v13"/>
                     <circle cx="6" cy="18" r="3"/>
                     <circle cx="18" cy="16" r="3"/>
@@ -73,12 +73,11 @@
                 <div class="music-meta">{{music.meta}}</div>
             </div>
             <div class="music-likes">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                     class="lucide lucide-heart-icon lucide-heart">
-                    <path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
                 </svg>
-                {{music.likes}}
+                <span>{{music.likes}}</span>
             </div>
         </div>
         {% endfor %}
@@ -91,17 +90,17 @@
         <h2 class="section-title">Як це працює</h2>
         <div class="steps">
             <div class="step">
-                <div class="step-number">1️⃣</div>
+                <div class="step-number">📚</div>
                 <div class="step-title">Обери книгу</div>
                 <div class="step-desc">Знайди свою улюблену книгу в нашому каталозі або додай нову</div>
             </div>
             <div class="step">
-                <div class="step-number">2️⃣</div>
+                <div class="step-number">📖</div>
                 <div class="step-title">Знайди розділ</div>
                 <div class="step-desc">Перейди до конкретного розділу, який тебе надихнув</div>
             </div>
             <div class="step">
-                <div class="step-number">3️⃣</div>
+                <div class="step-number">🎵</div>
                 <div class="step-title">Додай або послухай музику</div>
                 <div class="step-desc">Поділися своїми музичними рекомендаціями або відкрий нові композиції</div>
             </div>

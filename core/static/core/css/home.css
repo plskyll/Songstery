@@ -1,7 +1,7 @@
 /* Hero Section */
 .hero {
     text-align: center;
-    padding: 8rem 5% 6rem;
+    padding: 8rem 5% 3rem;
     background: linear-gradient(180deg, rgba(102, 126, 234, 0.1) 0%, transparent 100%);
     position: relative;
     overflow: hidden;
@@ -65,8 +65,8 @@
 
 .search-section {
     max-width: 900px;
-    margin: -3rem auto 5rem;
-    padding: 0 5%;
+    margin: 0 auto 5rem;
+    padding: 3rem 5% 0;
     position: relative;
     z-index: 10;
 }
@@ -125,6 +125,11 @@
 .filter-btn:hover {
     background: rgba(102, 126, 234, 0.2);
     border-color: #667eea;
+    color: #fff;
+}
+
+.filter-btn:active {
+    transform: scale(0.95);
 }
 
 .container {
@@ -176,7 +181,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* Додайте це */
+    overflow: hidden;
 }
 
 .book-cover img {
@@ -231,17 +236,23 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.music-cover svg {
+    color: white;
 }
 
 .music-info {
     flex: 1;
+    min-width: 0;
 }
 
 .music-title {
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 0.3rem;
+    color: #e8eaf6;
 }
 
 .music-meta {
@@ -250,8 +261,20 @@
 }
 
 .music-likes {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     color: #667eea;
     font-weight: 500;
+    flex-shrink: 0;
+}
+
+.music-likes svg {
+    color: #667eea;
+}
+
+.music-likes span {
+    font-size: 1rem;
 }
 
 /* How It Works */
@@ -281,18 +304,46 @@
 }
 
 .step-number {
-    font-size: 3rem;
+    font-size: 4rem;
     margin-bottom: 1rem;
-    filter: grayscale(0.3);
 }
 
 .step-title {
     font-size: 1.3rem;
     margin-bottom: 1rem;
     color: #e8eaf6;
+    font-weight: 600;
 }
 
 .step-desc {
     color: #9fa8b8;
     line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero p {
+        font-size: 1.1rem;
+    }
+
+    .search-input-group {
+        flex-direction: column;
+    }
+
+    .books-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    .music-item {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .step-number {
+        font-size: 3rem;
+    }
 }

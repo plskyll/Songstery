@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.views.generic import TemplateView
 
 books = [
@@ -79,14 +78,15 @@ popular_music = [
     },
 ]
 
-# Create your views here.
+
 class HomeView(TemplateView):
     template_name = 'core/home.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Головна'
-        context['section_title'] = 'Популярні книги'
+        context['books_section_title'] = 'Популярні книги'
+        context['music_section_title'] = 'Популярна музика'
         context['books'] = books
         context['popular_music'] = popular_music
         return context
