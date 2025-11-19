@@ -14,22 +14,25 @@
     </div>
     
     <div class="form-box">
-        <h1>🎼 Створити плейлист</h1>
+        <h1 style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            Створити плейлист
+        </h1>
         <p class="form-subtitle">Для книги "{{ book.title }}"</p>
-        
+
         <form method="post" class="playlist-form">
             {% csrf_token %}
-            
+
             <div class="form-group">
                 <label for="{{ form.title.id_for_label }}">Назва плейлиста *</label>
                 {{ form.title }}
             </div>
-            
+
             <div class="form-group">
                 <label for="{{ form.description.id_for_label }}">Опис</label>
                 {{ form.description }}
             </div>
-            
+
             <div class="form-group">
                 <label for="chapter_id">Для конкретного розділу (опціонально)</label>
                 <select name="chapter_id" id="chapter_id" class="form-select">
@@ -41,16 +44,21 @@
                     {% endfor %}
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label for="{{ form.mood.id_for_label }}">Настрій</label>
                 {{ form.mood }}
             </div>
-            
+
             <div class="form-group">
                 <label for="{{ form.external_link.id_for_label }}">Посилання на зовнішній плейлист (опціонально)</label>
                 {{ form.external_link }}
                 <small>Spotify, YouTube, Apple Music тощо</small>
+            </div>
+
+            <div class="form-group checkbox">
+                {{ form.is_public }}
+                <label for="{{ form.is_public.id_for_label }}">Зробити публічним</label>
             </div>
             
             <div class="form-actions">

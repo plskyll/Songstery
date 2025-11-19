@@ -56,8 +56,8 @@
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
-    text-decoration: none; /* Додано для посилань */
-    display: inline-block; /* Щоб посилання виглядало як кнопка */
+    text-decoration: none;
+    display: inline-block;
 }
 
 .btn-primary:hover {
@@ -65,6 +65,7 @@
     box-shadow: 0 8px 35px rgba(102, 126, 234, 0.6);
 }
 
+/* Search Section */
 .search-section {
     max-width: 900px;
     margin: 0 auto 5rem;
@@ -104,6 +105,7 @@
     background: rgba(26, 31, 58, 0.9);
 }
 
+/* Containers */
 .container {
     max-width: 1400px;
     margin: 0 auto;
@@ -120,14 +122,13 @@
     background-clip: text;
 }
 
-/* --- ВИПРАВЛЕНО: Books Grid --- */
+/* Books Grid */
 .books-grid {
     display: grid;
-    /* Задаємо minmax 180px, але не більше 240px, щоб не розтягувались */
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 2rem;
     margin-bottom: 5rem;
-    justify-items: center; /* Центруємо картки в їхніх комірках */
+    justify-items: center;
 }
 
 .book-card {
@@ -139,10 +140,10 @@
     cursor: pointer;
     border: 1px solid rgba(102, 126, 234, 0.2);
     width: 100%;
-    max-width: 240px; /* Обмеження ширини картки */
+    max-width: 240px;
     display: flex;
     flex-direction: column;
-    text-decoration: none; /* Прибираємо підкреслення */
+    text-decoration: none;
 }
 
 .book-card:hover {
@@ -153,9 +154,7 @@
 
 .book-cover {
     width: 100%;
-    /* aspect-ratio: 2/3 робить блок вертикальним прямокутником (стандарт книги) */
     aspect-ratio: 2/3;
-    height: auto; /* Висота підлаштується під ширину */
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 10px;
     margin-bottom: 1rem;
@@ -169,7 +168,7 @@
 .book-cover img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Картинка заповнить весь блок, обрізаючи зайве */
+    object-fit: cover;
     border-radius: 10px;
     display: block;
 }
@@ -179,7 +178,6 @@
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: #e8eaf6;
-    /* Обрізаємо довгі назви */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -189,10 +187,10 @@
 .book-author {
     color: #9fa8b8;
     font-size: 0.9rem;
-    margin-top: auto; /* Притискаємо автора до низу */
+    margin-top: auto;
 }
 
-/* --- Music List styles (залишаємо як є) --- */
+/* Music List */
 .music-list {
     display: flex;
     flex-direction: column;
@@ -256,9 +254,103 @@
     flex-shrink: 0;
 }
 
-/* Responsive */
+/* --- How It Works (Оновлено) --- */
+.how-it-works {
+    background: rgba(45, 53, 97, 0.4);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 4rem 3rem;
+    margin: 5rem 0;
+    position: relative;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+/* Сітка для блоків */
+.steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+/* Стиль окремого блоку */
+.step {
+    background: rgba(30, 36, 66, 0.6); /* Трохи темніший фон для контрасту */
+    padding: 2.5rem 2rem;
+    border-radius: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%; /* Щоб всі були однакової висоти */
+}
+
+.step:hover {
+    transform: translateY(-5px);
+    border-color: #667eea;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+}
+
+.step-number {
+    margin-bottom: 1.5rem;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s;
+}
+
+.step:hover .step-number {
+    transform: scale(1.1);
+    background: rgba(102, 126, 234, 0.2);
+}
+
+.step-title {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    color: #e8eaf6;
+    font-weight: 600;
+}
+
+.step-desc {
+    color: #9fa8b8;
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+/* Кнопка закриття секції */
+.btn-close-section {
+    background: transparent;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    color: #9fa8b8;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 2rem auto 0; /* Центруємо */
+}
+
+.btn-close-section:hover {
+    background: rgba(234, 102, 102, 0.1);
+    color: #ea6666;
+    border-color: #ea6666;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .hero h1 { font-size: 2.5rem; }
     .books-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-    .book-card { max-width: none; } /* На мобільному можна розтягнути */
+    .book-card { max-width: none; }
+    .steps { grid-template-columns: 1fr; } /* На мобільному в стовпчик */
+    .how-it-works { padding: 2rem 1.5rem; }
 }

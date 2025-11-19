@@ -15,9 +15,11 @@
         <div class="book-cover-large">
             {% with cover=book.get_cover %}
                 {% if cover %}
-                    <img src="{{ cover }}" alt="{{ book.title }}" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'no-cover\'>📚</div>'">
+                    <img src="{{ cover }}" alt="{{ book.title }}" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'no-cover\'><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'1\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M4 19.5A2.5 2.5 0 0 1 6.5 17H20\'></path><path d=\'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\'></path></svg></div>'">
                 {% else %}
-                    <div class="no-cover">📚</div>
+                    <div class="no-cover">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    </div>
                 {% endif %}
             {% endwith %}
         </div>
@@ -27,21 +29,31 @@
             <h2 class="author">{{ book.author }}</h2>
 
             <p class="meta">
-                <span>{{ book.year }}</span> • {{ book.genre }} • 👁 {{ book.views_count }}
+                <span>{{ book.year }}</span> • {{ book.genre }} •
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-bottom: 2px;"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                {{ book.views_count }}
             </p>
 
             <p class="description">{{ book.description }}</p>
 
             <div class="actions">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'core:save_book' book.id %}" class="btn-primary">
-                        {% if is_saved %}💾 Збережено{% else %}📚 Зберегти{% endif %}
+                    <a href="{% url 'core:save_book' book.id %}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                        {% if is_saved %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                            Збережено
+                        {% else %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                            Зберегти
+                        {% endif %}
                     </a>
-                    <a href="{% url 'core:create_playlist' book.id %}" class="btn-secondary">
-                        🎵 Створити плейлист
+                    <a href="{% url 'core:create_playlist' book.id %}" class="btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                        Створити плейлист
                     </a>
-                    <a href="{% url 'core:add_chapters' book.id %}" class="btn-secondary">
-                        ➕ Додати розділи
+                    <a href="{% url 'core:add_chapters' book.id %}" class="btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Додати розділи
                     </a>
                 {% else %}
                     <a href="{% url 'login' %}" class="btn-primary">Увійти</a>
@@ -52,7 +64,10 @@
 
     <section class="chapters-section">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <h2 style="margin-bottom: 0;">📖 Розділи книги</h2>
+            <h2 style="margin-bottom: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                Розділи книги
+            </h2>
         </div>
 
         {% if chapters %}
@@ -61,10 +76,10 @@
             <a href="{% url 'core:chapter_detail' book.id chapter.number %}"
                class="chapter-card {% if not chapter.is_approved %}unapproved{% endif %}">
 
-                <div class="chapter-number">
+                <div class="chapter-number" style="display: flex; align-items: center; gap: 0.5rem;">
                     {{ chapter.number }}
                     {% if not chapter.is_approved %}
-                        <span title="Очікує підтвердження">⚠️</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea6666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Очікує підтвердження"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                     {% endif %}
                 </div>
 
@@ -78,8 +93,9 @@
                         <small style="color: #ea6666;">(На модерації)</small>
                     {% endif %}
                 </div>
-                <div class="chapter-stats">
-                    🎵 {{ chapter.music_recommendations.count }}
+                <div class="chapter-stats" style="display: flex; align-items: center; gap: 0.3rem;">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                   {{ chapter.music_recommendations.count }}
                 </div>
             </a>
             {% endfor %}
@@ -94,7 +110,10 @@
 
     {% if top_music %}
     <section class="top-music-section">
-        <h2>🎵 Топ музичних рекомендацій</h2>
+        <h2 style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            Топ музичних рекомендацій
+        </h2>
         <div class="music-list-compact">
             {% for music in top_music %}
             <div class="music-item-compact">
@@ -103,7 +122,10 @@
                     <p>{{ music.artist }} • Розділ {{ music.chapter.number }}</p>
                 </div>
                 <div class="music-stats">
-                    <span>❤️ {{ music.likes_count }}</span>
+                    <div style="display:flex; align-items:center; gap:5px; color:#667eea;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        <span>{{ music.likes_count }}</span>
+                    </div>
                     <a href="{{ music.link_url }}" target="_blank" class="btn-link">Слухати</a>
                 </div>
             </div>
@@ -114,15 +136,24 @@
 
     {% if popular_playlists %}
     <section class="playlists-section">
-        <h2>🎼 Популярні плейлисти</h2>
+        <h2 style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            Популярні плейлисти
+        </h2>
         <div class="playlists-grid">
             {% for playlist in popular_playlists %}
             <a href="{% url 'core:playlist_detail' playlist.pk %}" class="playlist-card">
                 <h3>{{ playlist.title }}</h3>
                 <p>{{ playlist.description|truncatewords:15 }}</p>
                 <div class="playlist-meta">
-                    <span>👤 {{ playlist.creator.username }}</span>
-                    <span>❤️ {{ playlist.likes_count }}</span>
+                    <span style="display:flex; align-items:center; gap:5px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        {{ playlist.creator.username }}
+                    </span>
+                    <span style="display:flex; align-items:center; gap:5px;">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        {{ playlist.likes_count }}
+                    </span>
                 </div>
             </a>
             {% endfor %}
