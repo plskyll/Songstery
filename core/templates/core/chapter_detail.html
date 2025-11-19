@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/chapter_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chapter-detail">
+    <!-- Хлібні крихти -->
+    <div class="breadcrumbs">
+        <a href="{% url 'core:home' %}">Головна</a> / 
+        <a href="{% url 'core:book_detail' chapter.book.id %}">{{ chapter.book.title }}</a> / 
+        Розділ {{ chapter.number }}
+    </div>
+    
+    <!-- Інфо про розділ -->
+    <div class="chapter-header">
+        <h1>Розділ {{ chapter.number }}: {{ chapter.title }}</h1>
+        {% if chapter.description %}
+            <p class="chapter-desc">{{ chapter.description }}</p>
+        {% endif %}
+        {% if chapter.mood_tags %}
+            <div class="mood-tags-large">
+                <span class="tag-label">Настрій:</span>
+                {{ chapter.mood_tags }}
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Навігація -->
+    <div class="chapter-navigation">
+        {% if prev_chapter %}
+            <a href="{% url 'core:chapter_detail' chapter.book.id prev_chapter.number %}" 
+               class="btn-nav prev">
+                ← Розділ {{ prev_chapter.number }}
+            </a>
+        {% endif %}
+        
+        <a href="{% url 'core:book_detail' chapter.book.id %}" class="btn-nav back">
+            📚 Назад до книги
+        </a>
+        
+        {% if next_chapter %}
+            <a href="{% url 'core:chapter_detail' chapter.book.id next_chapter.number %}" 
+               class="btn-nav next">
+                Розділ {{ next_chapter.number }} →
+            </a>
+        {% endif %}
+    </div>
+    
+    <!-- Музичні рекомендації -->
+    <section class="music-section">
+        <div class="section-header">
+            <h2>🎵 Музичні рекомендації</h2>
+            {% if user.is_authenticated %}
+                <a href="{% url 'core:add_music' chapter.id %}" class="btn-add">
+                    + Додати музику
+                </a>
+            {% else %}
+                <a href="/admin/login/?next={{ request.path }}" class="btn-add">
+                    Увійти щоб додати
+                </a>
+            {% endif %}
+        </div>
+        
+        <div class="music-list">
+            {% for music in music_recommendations %}
+            <div class="music-item">
+                <!-- YouTube embed -->
+                {% if music.embed_code and music.link_type == 'youtube' %}
+                <div class="music-player">
+                    <iframe 
+                        width="100%" 
+                        height="200"
+                        src="https://www.youtube.com/embed/{{ music.embed_code }}" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                {% endif %}
+                
+                <div class="music-content">
+                    <div class="music-info">
+                        <h3>{{ music.track_title }}</h3>
+                        <p class="artist">{{ music.artist }}</p>
+                        
+                        {% if music.comment %}
+                            <p class="comment">💭 {{ music.comment }}</p>
+                        {% endif %}
+                        
+                        <div class="music-meta">
+                            <span>👤 {{ music.user.username }}</span>
+                            <span>📅 {{ music.created_at|date:"d.m.Y" }}</span>
+                            <a href="{{ music.link_url }}" target="_blank" class="link">
+                                🔗 Відкрити в {{ music.get_link_type_display }}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="music-actions">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'core:like_music' music.id %}" 
+                               class="btn-like {% if music.id in liked_music_ids %}liked{% endif %}">
+                                ❤️ {{ music.likes_count }}
+                            </a>
+                            
+                            {% if music.user == user or user.is_staff %}
+                                <a href="{% url 'core:delete_music' music.id %}" 
+                                   class="btn-delete"
+                                   onclick="return confirm('Видалити цю рекомендацію?')">
+                                    🗑️
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <span class="likes">❤️ {{ music.likes_count }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <p>🎵 Поки що немає музичних рекомендацій.</p>
+                {% if user.is_authenticated %}
+                    <p>Будь першим хто додасть!</p>
+                    <a href="{% url 'core:add_music' chapter.id %}" class="btn-primary">
+                        Додати музику
+                    </a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

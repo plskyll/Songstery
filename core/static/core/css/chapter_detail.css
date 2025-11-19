@@ -1,0 +1,251 @@
+.chapter-detail {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 5%;
+}
+
+.chapter-header {
+    background: rgba(45, 53, 97, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+}
+
+.chapter-header h1 {
+    font-size: 2rem;
+    color: #e8eaf6;
+    margin-bottom: 1rem;
+}
+
+.chapter-desc {
+    color: #b8c5d6;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+}
+
+.mood-tags-large {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: rgba(102, 126, 234, 0.2);
+    border-radius: 20px;
+    color: #667eea;
+    font-style: italic;
+}
+
+.tag-label {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+/* Навігація */
+.chapter-navigation {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.btn-nav {
+    padding: 0.8rem 1.5rem;
+    background: rgba(45, 53, 97, 0.6);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 10px;
+    text-decoration: none;
+    color: #b8c5d6;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.btn-nav:hover {
+    background: rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.btn-nav.back {
+    margin-left: auto;
+}
+
+/* Музична секція */
+.music-section {
+    margin-bottom: 3rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.section-header h2 {
+    font-size: 1.8rem;
+    color: #e8eaf6;
+}
+
+.btn-add {
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-add:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+}
+
+/* Музичні айтеми */
+.music-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.music-item {
+    background: rgba(45, 53, 97, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    transition: all 0.3s;
+}
+
+.music-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
+}
+
+.music-player {
+    width: 100%;
+    height: 200px;
+    background: #000;
+}
+
+.music-player iframe {
+    width: 100%;
+    height: 100%;
+}
+
+.music-content {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.music-info {
+    flex: 1;
+}
+
+.music-info h3 {
+    color: #e8eaf6;
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
+}
+
+.music-info .artist {
+    color: #9fa8b8;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.music-info .comment {
+    color: #b8c5d6;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: rgba(102, 126, 234, 0.1);
+    border-left: 3px solid #667eea;
+    border-radius: 5px;
+    line-height: 1.6;
+}
+
+.music-meta {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    color: #7a8aa3;
+    font-size: 0.9rem;
+}
+
+.music-meta .link {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.music-meta .link:hover {
+    text-decoration: underline;
+}
+
+/* Дії з музикою */
+.music-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-like {
+    padding: 0.7rem 1.5rem;
+    background: rgba(102, 126, 234, 0.2);
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-radius: 25px;
+    color: #667eea;
+    text-decoration: none;
+    transition: all 0.3s;
+    font-weight: 600;
+}
+
+.btn-like:hover {
+    background: rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
+    transform: scale(1.05);
+}
+
+.btn-like.liked {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.btn-delete {
+    padding: 0.5rem 1rem;
+    background: rgba(234, 102, 102, 0.2);
+    border: 1px solid rgba(234, 102, 102, 0.3);
+    border-radius: 20px;
+    color: #ea6666;
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: all 0.3s;
+}
+
+.btn-delete:hover {
+    background: #ea6666;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .music-content {
+        flex-direction: column;
+    }
+
+    .music-actions {
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .chapter-navigation {
+        flex-direction: column;
+    }
+
+    .btn-nav.back {
+        margin-left: 0;
+    }
+}

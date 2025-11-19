@@ -1,0 +1,335 @@
+.book-detail-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 5%;
+}
+
+.breadcrumbs {
+    color: #9fa8b8;
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+}
+
+.breadcrumbs a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.breadcrumbs a:hover {
+    color: #fff;
+}
+
+.book-header {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 3rem;
+    margin-bottom: 4rem;
+    background: rgba(45, 53, 97, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 20px;
+}
+
+.book-cover-large {
+    width: 100%;
+    height: 450px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.book-cover-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-cover {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+}
+
+.book-info h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #fff 0%, #b8c5d6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.book-info .author {
+    font-size: 1.5rem;
+    color: #9fa8b8;
+    margin-bottom: 1rem;
+}
+
+.book-info .meta {
+    color: #7a8aa3;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.book-info .description {
+    color: #b8c5d6;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 1rem 2rem;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+}
+
+.btn-secondary {
+    background: rgba(102, 126, 234, 0.2);
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-secondary:hover {
+    background: rgba(102, 126, 234, 0.3);
+    transform: translateY(-3px);
+}
+
+/* Розділи */
+.chapters-section {
+    margin-bottom: 4rem;
+}
+
+.chapters-section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #e8eaf6;
+}
+
+.chapters-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.chapter-card {
+    background: rgba(45, 53, 97, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    text-decoration: none;
+    transition: all 0.3s;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.chapter-card:hover {
+    transform: translateX(10px);
+    border-color: #667eea;
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+}
+
+.chapter-number {
+    font-size: 2rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    min-width: 60px;
+}
+
+.chapter-info {
+    flex: 1;
+}
+
+.chapter-info h3 {
+    color: #e8eaf6;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.chapter-desc {
+    color: #9fa8b8;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.mood-tags {
+    color: #667eea;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.chapter-stats {
+    color: #9fa8b8;
+    font-size: 0.9rem;
+}
+
+/* Топ музика */
+.top-music-section {
+    margin-bottom: 4rem;
+}
+
+.top-music-section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #e8eaf6;
+}
+
+.music-list-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.music-item-compact {
+    background: rgba(45, 53, 97, 0.6);
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.music-item-compact:hover {
+    background: rgba(45, 53, 97, 0.8);
+}
+
+.music-item-compact h4 {
+    color: #e8eaf6;
+    margin-bottom: 0.3rem;
+}
+
+.music-item-compact p {
+    color: #9fa8b8;
+    font-size: 0.9rem;
+}
+
+.music-stats {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.btn-link {
+    padding: 0.5rem 1rem;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.btn-link:hover {
+    background: #764ba2;
+}
+
+/* Плейлисти */
+.playlists-section {
+    margin-bottom: 4rem;
+}
+
+.playlists-section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #e8eaf6;
+}
+
+.playlists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.playlist-card {
+    background: rgba(45, 53, 97, 0.6);
+    padding: 1.5rem;
+    border-radius: 15px;
+    text-decoration: none;
+    transition: all 0.3s;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.playlist-card:hover {
+    transform: translateY(-5px);
+    border-color: #667eea;
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+}
+
+.playlist-card h3 {
+    color: #e8eaf6;
+    margin-bottom: 0.5rem;
+}
+
+.playlist-card p {
+    color: #9fa8b8;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.playlist-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #7a8aa3;
+    font-size: 0.85rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(45, 53, 97, 0.4);
+    border-radius: 15px;
+    color: #9fa8b8;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .book-header {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .book-cover-large {
+        height: 350px;
+    }
+
+    .chapter-card {
+        flex-direction: column;
+        text-align: center;
+    }
+}

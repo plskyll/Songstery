@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/book_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="book-detail-container">
+    <!-- Хлібні крихти -->
+    <div class="breadcrumbs">
+        <a href="{% url 'core:home' %}">Головна</a> / {{ book.title }}
+    </div>
+    
+    <!-- Шапка книги -->
+    <div class="book-header">
+        <div class="book-cover-large">
+            {% if book.cover_url %}
+                <img src="{{ book.cover_url }}" alt="{{ book.title }}">
+            {% else %}
+                <div class="no-cover">📚</div>
+            {% endif %}
+        </div>
+        
+        <div class="book-info">
+            <h1>{{ book.title }}</h1>
+            <h2 class="author">{{ book.author }}</h2>
+            <p class="meta">
+                <span>{{ book.year }}</span>
+                {% if book.genre %}
+                    <span>• {{ book.genre }}</span>
+                {% endif %}
+                <span>• 👁 {{ book.views_count }} переглядів</span>
+            </p>
+            
+            {% if book.description %}
+                <p class="description">{{ book.description }}</p>
+            {% endif %}
+            
+            <div class="actions">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'core:save_book' book.id %}" class="btn-primary">
+                        {% if is_saved %}
+                            💾 Збережено
+                        {% else %}
+                            📚 Зберегти книгу
+                        {% endif %}
+                    </a>
+                    <a href="{% url 'core:create_playlist' book.id %}" class="btn-secondary">
+                        🎵 Створити плейлист
+                    </a>
+                {% else %}
+                    <a href="/admin/login/?next={{ request.path }}" class="btn-primary">
+                        Увійти щоб зберегти
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Розділи -->
+    {% if chapters %}
+    <section class="chapters-section">
+        <h2>📖 Розділи книги</h2>
+        <div class="chapters-list">
+            {% for chapter in chapters %}
+            <a href="{% url 'core:chapter_detail' book.id chapter.number %}" 
+               class="chapter-card">
+                <div class="chapter-number">{{ chapter.number }}</div>
+                <div class="chapter-info">
+                    <h3>{{ chapter.title }}</h3>
+                    {% if chapter.description %}
+                        <p class="chapter-desc">{{ chapter.description|truncatewords:20 }}</p>
+                    {% endif %}
+                    {% if chapter.mood_tags %}
+                        <div class="mood-tags">{{ chapter.mood_tags }}</div>
+                    {% endif %}
+                </div>
+                <div class="chapter-stats">
+                    🎵 {{ chapter.music_recommendations.count }} треків
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% else %}
+        <div class="empty-state">
+            <p>📖 Розділи ще не додані. Додайте їх в адмін-панелі!</p>
+        </div>
+    {% endif %}
+    
+    <!-- Топ музика -->
+    {% if top_music %}
+    <section class="top-music-section">
+        <h2>🎵 Топ музичних рекомендацій</h2>
+        <div class="music-list-compact">
+            {% for music in top_music %}
+            <div class="music-item-compact">
+                <div class="music-info">
+                    <h4>{{ music.track_title }}</h4>
+                    <p>{{ music.artist }} • Розділ {{ music.chapter.number }}</p>
+                </div>
+                <div class="music-stats">
+                    <span>❤️ {{ music.likes_count }}</span>
+                    <a href="{{ music.link_url }}" target="_blank" class="btn-link">Слухати</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    
+    <!-- Популярні плейлисти -->
+    {% if popular_playlists %}
+    <section class="playlists-section">
+        <h2>🎼 Популярні плейлисти</h2>
+        <div class="playlists-grid">
+            {% for playlist in popular_playlists %}
+            <a href="{% url 'core:playlist_detail' playlist.pk %}" class="playlist-card">
+                <h3>{{ playlist.title }}</h3>
+                <p>{{ playlist.description|truncatewords:15 }}</p>
+                <div class="playlist-meta">
+                    <span>👤 {{ playlist.creator.username }}</span>
+                    <span>❤️ {{ playlist.likes_count }}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

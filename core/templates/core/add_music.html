@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="breadcrumbs">
+        <a href="{% url 'core:home' %}">Головна</a> / 
+        <a href="{% url 'core:book_detail' chapter.book.id %}">{{ chapter.book.title }}</a> / 
+        <a href="{% url 'core:chapter_detail' chapter.book.id chapter.number %}">Розділ {{ chapter.number }}</a> /
+        Додати музику
+    </div>
+    
+    <div class="form-box">
+        <h1>🎵 Додати музичну рекомендацію</h1>
+        <p class="form-subtitle">
+            До розділу "{{ chapter.title }}" книги "{{ chapter.book.title }}"
+        </p>
+        
+        <form method="post" class="music-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.track_title.id_for_label }}">Назва треку *</label>
+                {{ form.track_title }}
+                {% if form.track_title.errors %}
+                    <span class="error">{{ form.track_title.errors }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.artist.id_for_label }}">Виконавець *</label>
+                {{ form.artist }}
+                {% if form.artist.errors %}
+                    <span class="error">{{ form.artist.errors }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.link_type.id_for_label }}">Платформа *</label>
+                {{ form.link_type }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.link_url.id_for_label }}">Посилання на трек *</label>
+                {{ form.link_url }}
+                <small>Повне посилання на трек (https://...)</small>
+                {% if form.link_url.errors %}
+                    <span class="error">{{ form.link_url.errors }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.embed_code.id_for_label }}">YouTube ID (опціонально)</label>
+                {{ form.embed_code }}
+                <small>Для YouTube: тільки ID відео (наприклад: dQw4w9WgXcQ)</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.comment.id_for_label }}">Чому саме ця музика?</label>
+                {{ form.comment }}
+                <small>Розкажіть, чому ця музика підходить до цього розділу</small>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Додати рекомендацію</button>
+                <a href="{% url 'core:chapter_detail' chapter.book.id chapter.number %}" 
+                   class="btn-secondary">Скасувати</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

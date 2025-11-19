@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="breadcrumbs">
+        <a href="{% url 'core:home' %}">Головна</a> / 
+        <a href="{% url 'core:book_detail' book.id %}">{{ book.title }}</a> /
+        Створити плейлист
+    </div>
+    
+    <div class="form-box">
+        <h1>🎼 Створити плейлист</h1>
+        <p class="form-subtitle">Для книги "{{ book.title }}"</p>
+        
+        <form method="post" class="playlist-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Назва плейлиста *</label>
+                {{ form.title }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Опис</label>
+                {{ form.description }}
+            </div>
+            
+            <div class="form-group">
+                <label for="chapter_id">Для конкретного розділу (опціонально)</label>
+                <select name="chapter_id" id="chapter_id" class="form-select">
+                    <option value="">Для всієї книги</option>
+                    {% for chapter in chapters %}
+                        <option value="{{ chapter.id }}">
+                            Розділ {{ chapter.number }}: {{ chapter.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.mood.id_for_label }}">Настрій</label>
+                {{ form.mood }}
+            </div>
+            
+            <div class="form-group checkbox">
+                {{ form.is_public }}
+                <label for="{{ form.is_public.id_for_label }}">Зробити публічним</label>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Створити плейлист</button>
+                <a href="{% url 'core:book_detail' book.id %}" class="btn-secondary">Скасувати</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
