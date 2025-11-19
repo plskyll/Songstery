@@ -47,9 +47,10 @@
                 {{ form.mood }}
             </div>
             
-            <div class="form-group checkbox">
-                {{ form.is_public }}
-                <label for="{{ form.is_public.id_for_label }}">Зробити публічним</label>
+            <div class="form-group">
+                <label for="{{ form.external_link.id_for_label }}">Посилання на зовнішній плейлист (опціонально)</label>
+                {{ form.external_link }}
+                <small>Spotify, YouTube, Apple Music тощо</small>
             </div>
             
             <div class="form-actions">

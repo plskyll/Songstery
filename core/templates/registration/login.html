@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-box">
+        <h1>Вхід в акаунт</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Ім'я користувача</label>
+                <input type="text" name="username" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" name="password" class="form-input" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Увійти</button>
+            </div>
+        </form>
+        <p style="margin-top: 1rem; text-align: center; color: #9fa8b8;">
+            Немає акаунта? <a href="{% url 'signup' %}" style="color: #667eea;">Зареєструватися</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="breadcrumbs">
+        <a href="{% url 'core:home' %}">Головна</a> / 
+        <a href="{% url 'core:book_detail' book.id %}">{{ book.title }}</a> / 
+        Додати розділи
+    </div>
+    
+    <div class="form-box">
+        <h1>📖 Додати розділи</h1>
+        <p class="form-subtitle">Швидке додавання розділів до "{{ book.title }}"</p>
+        
+        {% if not user.is_staff and user != book.creator %}
+        <div style="background: rgba(234, 102, 102, 0.2); padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; color: #ffabab;">
+            ⚠️ Ви не є автором цієї книги. Додані вами розділи стануть доступні публічно тільки після перевірки адміністратором.
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.number_of_chapters.id_for_label }}">Скільки розділів додати?</label>
+                {{ form.number_of_chapters }}
+                <small>Система автоматично створить розділи, продовжуючи нумерацію.</small>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Згенерувати розділи</button>
+                <a href="{% url 'core:book_detail' book.id %}" class="btn-secondary">Скасувати</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

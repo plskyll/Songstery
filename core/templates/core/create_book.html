@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="breadcrumbs">
+        <a href="{% url 'core:home' %}">Головна</a> / Додати книгу
+    </div>
+    
+    <div class="form-box">
+        <h1>📚 Додати нову книгу</h1>
+        <p class="form-subtitle">Додайте книгу до каталогу Songstery</p>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <span class="error">{{ field.errors.0 }}</span>
+                {% endif %}
+                {% if field.help_text %}
+                    <small>{{ field.help_text }}</small>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Створити книгу</button>
+                <a href="{% url 'core:home' %}" class="btn-secondary">Скасувати</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

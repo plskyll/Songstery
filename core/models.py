@@ -5,18 +5,41 @@ from django.urls import reverse
 
 class Book(models.Model):
     """Книга"""
+    creator = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Створив"
+    )
     title = models.CharField(max_length=255, verbose_name="Назва")
     author = models.CharField(max_length=255, verbose_name="Автор")
     year = models.IntegerField(verbose_name="Рік")
     description = models.TextField(blank=True, verbose_name="Опис")
-    cover_url = models.URLField(blank=True, verbose_name="Обкладинка")
-    genre = models.CharField(max_length=100, blank=True, verbose_name="Жанр")
 
+    # Обкладинки: файл (пріоритет) або посилання
+    cover_image = models.ImageField(
+        upload_to='books/covers/',
+        blank=True,
+        null=True,
+        verbose_name="Файл обкладинки"
+    )
+    cover_url = models.URLField(blank=True, verbose_name="Посилання на обкладинку")
+
+    genre = models.CharField(max_length=100, blank=True, verbose_name="Жанр")
     created_at = models.DateTimeField(auto_now_add=True)
     views_count = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.title} - {self.author}"
+
+    def get_cover(self):
+        """Повертає URL обкладинки: пріоритет у завантаженого файлу, потім посилання"""
+        if self.cover_image:
+            return self.cover_image.url
+        if self.cover_url:
+            return self.cover_url
+        return None
 
     def get_absolute_url(self):
         return reverse('core:book_detail', kwargs={'pk': self.pk})
@@ -39,6 +62,9 @@ class Chapter(models.Model):
         help_text="Наприклад: спокій, напруга, епічність"
     )
 
+    # Статус модерації (False = потребує перевірки адміном)
+    is_approved = models.BooleanField(default=False, verbose_name="Підтверджено")
+
     def __str__(self):
         return f"Розділ {self.number}: {self.title}"
 
@@ -50,7 +76,6 @@ class Chapter(models.Model):
 
     class Meta:
         ordering = ['number']
-        unique_together = ['book', 'number']
         verbose_name = "Розділ"
         verbose_name_plural = "Розділи"
 
@@ -108,6 +133,9 @@ class Playlist(models.Model):
     )
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     mood = models.CharField(max_length=200, blank=True)
+
+    # НОВЕ ПОЛЕ: Зовнішнє посилання
+    external_link = models.URLField(blank=True, verbose_name="Посилання на плейлист (YouTube/Spotify)")
 
     likes_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)

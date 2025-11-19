@@ -56,6 +56,8 @@
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+    text-decoration: none; /* Додано для посилань */
+    display: inline-block; /* Щоб посилання виглядало як кнопка */
 }
 
 .btn-primary:hover {
@@ -102,36 +104,6 @@
     background: rgba(26, 31, 58, 0.9);
 }
 
-.search-input-group input::placeholder {
-    color: #7a8aa3;
-}
-
-.filters {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.filter-btn {
-    padding: 0.6rem 1.5rem;
-    border: 1px solid rgba(102, 126, 234, 0.4);
-    border-radius: 20px;
-    background: transparent;
-    color: #b8c5d6;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.filter-btn:hover {
-    background: rgba(102, 126, 234, 0.2);
-    border-color: #667eea;
-    color: #fff;
-}
-
-.filter-btn:active {
-    transform: scale(0.95);
-}
-
 .container {
     max-width: 1400px;
     margin: 0 auto;
@@ -148,22 +120,29 @@
     background-clip: text;
 }
 
-/* Books Grid */
+/* --- ВИПРАВЛЕНО: Books Grid --- */
 .books-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    /* Задаємо minmax 180px, але не більше 240px, щоб не розтягувались */
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 2rem;
     margin-bottom: 5rem;
+    justify-items: center; /* Центруємо картки в їхніх комірках */
 }
 
 .book-card {
     background: rgba(45, 53, 97, 0.6);
     backdrop-filter: blur(10px);
     border-radius: 15px;
-    padding: 1.5rem;
+    padding: 1rem;
     transition: all 0.4s ease;
     cursor: pointer;
     border: 1px solid rgba(102, 126, 234, 0.2);
+    width: 100%;
+    max-width: 240px; /* Обмеження ширини картки */
+    display: flex;
+    flex-direction: column;
+    text-decoration: none; /* Прибираємо підкреслення */
 }
 
 .book-card:hover {
@@ -174,7 +153,9 @@
 
 .book-cover {
     width: 100%;
-    height: 280px;
+    /* aspect-ratio: 2/3 робить блок вертикальним прямокутником (стандарт книги) */
+    aspect-ratio: 2/3;
+    height: auto; /* Висота підлаштується під ширину */
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 10px;
     margin-bottom: 1rem;
@@ -182,13 +163,15 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    position: relative;
 }
 
 .book-cover img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* Картинка заповнить весь блок, обрізаючи зайве */
     border-radius: 10px;
+    display: block;
 }
 
 .book-title {
@@ -196,14 +179,20 @@
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: #e8eaf6;
+    /* Обрізаємо довгі назви */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .book-author {
     color: #9fa8b8;
     font-size: 0.9rem;
+    margin-top: auto; /* Притискаємо автора до низу */
 }
 
-/* Music Recommendations */
+/* --- Music List styles (залишаємо як є) --- */
 .music-list {
     display: flex;
     flex-direction: column;
@@ -220,6 +209,7 @@
     gap: 1.5rem;
     transition: all 0.3s ease;
     border: 1px solid rgba(102, 126, 234, 0.2);
+    text-decoration: none;
 }
 
 .music-item:hover {
@@ -237,9 +227,6 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-}
-
-.music-cover svg {
     color: white;
 }
 
@@ -269,81 +256,9 @@
     flex-shrink: 0;
 }
 
-.music-likes svg {
-    color: #667eea;
-}
-
-.music-likes span {
-    font-size: 1rem;
-}
-
-/* How It Works */
-.how-it-works {
-    background: rgba(45, 53, 97, 0.4);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 4rem 3rem;
-    margin: 5rem 0;
-}
-
-.steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 3rem;
-    margin-top: 3rem;
-}
-
-.step {
-    text-align: center;
-    padding: 2rem;
-    transition: all 0.3s ease;
-}
-
-.step:hover {
-    transform: scale(1.05);
-}
-
-.step-number {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-}
-
-.step-title {
-    font-size: 1.3rem;
-    margin-bottom: 1rem;
-    color: #e8eaf6;
-    font-weight: 600;
-}
-
-.step-desc {
-    color: #9fa8b8;
-    line-height: 1.6;
-}
-
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
-    .hero h1 {
-        font-size: 2.5rem;
-    }
-
-    .hero p {
-        font-size: 1.1rem;
-    }
-
-    .search-input-group {
-        flex-direction: column;
-    }
-
-    .books-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    }
-
-    .music-item {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .step-number {
-        font-size: 3rem;
-    }
+    .hero h1 { font-size: 2.5rem; }
+    .books-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .book-card { max-width: none; } /* На мобільному можна розтягнути */
 }

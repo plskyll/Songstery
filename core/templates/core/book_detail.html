@@ -7,89 +7,91 @@
 
 {% block content %}
 <div class="book-detail-container">
-    <!-- Хлібні крихти -->
     <div class="breadcrumbs">
         <a href="{% url 'core:home' %}">Головна</a> / {{ book.title }}
     </div>
-    
-    <!-- Шапка книги -->
+
     <div class="book-header">
         <div class="book-cover-large">
-            {% if book.cover_url %}
-                <img src="{{ book.cover_url }}" alt="{{ book.title }}">
-            {% else %}
-                <div class="no-cover">📚</div>
-            {% endif %}
+            {% with cover=book.get_cover %}
+                {% if cover %}
+                    <img src="{{ cover }}" alt="{{ book.title }}" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'no-cover\'>📚</div>'">
+                {% else %}
+                    <div class="no-cover">📚</div>
+                {% endif %}
+            {% endwith %}
         </div>
-        
+
         <div class="book-info">
             <h1>{{ book.title }}</h1>
             <h2 class="author">{{ book.author }}</h2>
+
             <p class="meta">
-                <span>{{ book.year }}</span>
-                {% if book.genre %}
-                    <span>• {{ book.genre }}</span>
-                {% endif %}
-                <span>• 👁 {{ book.views_count }} переглядів</span>
+                <span>{{ book.year }}</span> • {{ book.genre }} • 👁 {{ book.views_count }}
             </p>
-            
-            {% if book.description %}
-                <p class="description">{{ book.description }}</p>
-            {% endif %}
-            
+
+            <p class="description">{{ book.description }}</p>
+
             <div class="actions">
                 {% if user.is_authenticated %}
                     <a href="{% url 'core:save_book' book.id %}" class="btn-primary">
-                        {% if is_saved %}
-                            💾 Збережено
-                        {% else %}
-                            📚 Зберегти книгу
-                        {% endif %}
+                        {% if is_saved %}💾 Збережено{% else %}📚 Зберегти{% endif %}
                     </a>
                     <a href="{% url 'core:create_playlist' book.id %}" class="btn-secondary">
                         🎵 Створити плейлист
                     </a>
-                {% else %}
-                    <a href="/admin/login/?next={{ request.path }}" class="btn-primary">
-                        Увійти щоб зберегти
+                    <a href="{% url 'core:add_chapters' book.id %}" class="btn-secondary">
+                        ➕ Додати розділи
                     </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-primary">Увійти</a>
                 {% endif %}
             </div>
         </div>
     </div>
-    
-    <!-- Розділи -->
-    {% if chapters %}
+
     <section class="chapters-section">
-        <h2>📖 Розділи книги</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 0;">📖 Розділи книги</h2>
+        </div>
+
+        {% if chapters %}
         <div class="chapters-list">
             {% for chapter in chapters %}
-            <a href="{% url 'core:chapter_detail' book.id chapter.number %}" 
-               class="chapter-card">
-                <div class="chapter-number">{{ chapter.number }}</div>
+            <a href="{% url 'core:chapter_detail' book.id chapter.number %}"
+               class="chapter-card {% if not chapter.is_approved %}unapproved{% endif %}">
+
+                <div class="chapter-number">
+                    {{ chapter.number }}
+                    {% if not chapter.is_approved %}
+                        <span title="Очікує підтвердження">⚠️</span>
+                    {% endif %}
+                </div>
+
                 <div class="chapter-info">
                     <h3>{{ chapter.title }}</h3>
                     {% if chapter.description %}
-                        <p class="chapter-desc">{{ chapter.description|truncatewords:20 }}</p>
+                        <p class="chapter-desc">{{ chapter.description|truncatewords:15 }}</p>
                     {% endif %}
-                    {% if chapter.mood_tags %}
-                        <div class="mood-tags">{{ chapter.mood_tags }}</div>
+
+                    {% if not chapter.is_approved %}
+                        <small style="color: #ea6666;">(На модерації)</small>
                     {% endif %}
                 </div>
                 <div class="chapter-stats">
-                    🎵 {{ chapter.music_recommendations.count }} треків
+                    🎵 {{ chapter.music_recommendations.count }}
                 </div>
             </a>
             {% endfor %}
         </div>
-    </section>
-    {% else %}
+        {% else %}
         <div class="empty-state">
-            <p>📖 Розділи ще не додані. Додайте їх в адмін-панелі!</p>
+            <p>Розділів поки немає.</p>
+            <a href="{% url 'core:add_chapters' book.id %}" class="btn-primary">Створити перші розділи</a>
         </div>
-    {% endif %}
-    
-    <!-- Топ музика -->
+        {% endif %}
+    </section>
+
     {% if top_music %}
     <section class="top-music-section">
         <h2>🎵 Топ музичних рекомендацій</h2>
@@ -109,8 +111,7 @@
         </div>
     </section>
     {% endif %}
-    
-    <!-- Популярні плейлисти -->
+
     {% if popular_playlists %}
     <section class="playlists-section">
         <h2>🎼 Популярні плейлисти</h2>
@@ -129,4 +130,22 @@
     </section>
     {% endif %}
 </div>
+
+<style>
+.chapter-card.unapproved {
+    opacity: 0.7;
+    border: 1px dashed #ea6666;
+    background: rgba(234, 102, 102, 0.1);
+}
+.no-cover {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    border-radius: 15px;
+}
+</style>
 {% endblock %}

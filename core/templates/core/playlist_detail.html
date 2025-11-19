@@ -23,26 +23,42 @@
                 <p class="description">{{ playlist.description }}</p>
             {% endif %}
             
-            {% if playlist.mood %}
-                <div class="mood">Настрій: {{ playlist.mood }}</div>
-            {% endif %}
-            
             <div class="playlist-meta">
+                {% if playlist.mood %}
+                    <span class="mood-tag">{{ playlist.mood }}</span>
+                {% endif %}
                 <span>❤️ {{ playlist.likes_count }} лайків</span>
                 <span>📅 {{ playlist.created_at|date:"d.m.Y" }}</span>
             </div>
-            
-            {% if user.is_authenticated %}
-                <a href="{% url 'core:like_playlist' playlist.id %}" 
-                   class="btn-like {% if is_liked %}liked{% endif %}">
-                    {% if is_liked %}❤️ Вподобано{% else %}🤍 Вподобати{% endif %}
+
+            <div class="playlist-actions" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'core:like_playlist' playlist.id %}"
+                       class="btn-like {% if is_liked %}liked{% endif %}">
+                        {% if is_liked %}❤️ Вподобано{% else %}🤍 Вподобати{% endif %}
+                    </a>
+                {% endif %}
+
+                {% if playlist.external_link %}
+                    <a href="{{ playlist.external_link }}" target="_blank" class="btn-primary" style="background: #1DB954; text-decoration: none; padding: 0.7rem 1.5rem; border-radius: 25px; color: white;">
+                        🔗 Слухати на платформі
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <section class="tracks-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin-bottom: 0;">Треки</h2>
+
+            {% if user == playlist.creator %}
+                <a href="{% url 'core:add_track' playlist.id %}" class="btn-secondary" style="font-size: 0.9rem;">
+                    + Додати трек
                 </a>
             {% endif %}
         </div>
-    </div>
-    
-    <section class="tracks-section">
-        <h2>Треки</h2>
+
         {% if tracks %}
             <div class="tracks-list">
                 {% for track in tracks %}
@@ -57,8 +73,23 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p class="empty-state">Треки ще не додані</p>
+            <div class="empty-state">
+                <p>В цьому плейлисті поки немає треків.</p>
+                {% if user == playlist.creator %}
+                    <a href="{% url 'core:add_track' playlist.id %}" class="btn-primary">Додати перший трек</a>
+                {% endif %}
+            </div>
         {% endif %}
     </section>
 </div>
+
+<style>
+.mood-tag {
+    background: rgba(102, 126, 234, 0.2);
+    color: #667eea;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.85rem;
+}
+</style>
 {% endblock %}
