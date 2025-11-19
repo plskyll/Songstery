@@ -335,3 +335,40 @@ def profile(request):
         'my_playlists': my_playlists,
         'my_recommendations': my_recommendations
     })
+
+
+class HomeView(TemplateView):
+    template_name = 'core/home.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Головна'
+
+        # Пошук
+        search_query = self.request.GET.get('search', '')
+
+        if search_query:
+            books_qs = Book.objects.filter(
+                Q(title__icontains=search_query) |
+                Q(author__icontains=search_query) |
+                Q(genre__icontains=search_query)
+            )
+            context['books_section_title'] = f'Результати пошуку: "{search_query}"'
+        else:
+            books_qs = Book.objects.all()
+            context['books_section_title'] = 'Популярні книги'
+
+        context['db_books'] = books_qs[:12]
+        context['search_query'] = search_query
+
+        # Статичні дані для демо
+        context['books'] = books_data
+        context['popular_music'] = popular_music
+        context['music_section_title'] = 'Популярна музика'
+
+        # Топ музика з БД
+        context['top_music_db'] = MusicRecommendation.objects.select_related(
+            'user', 'chapter__book'
+        ).order_by('-likes_count')[:10]
+
+        return context

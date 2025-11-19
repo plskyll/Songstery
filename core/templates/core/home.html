@@ -13,7 +13,7 @@
     <div class="hero-content">
         <h1>Знайди музику до своєї улюбленої книги</h1>
         <p>Поєднуй літературу та музику для створення особливого вайбу</p>
-        <a href="#">
+        <a href="#catalog">
             <button class="btn-primary">Почати</button>
         </a>
     </div>
@@ -23,66 +23,91 @@
 <!-- Search Section -->
 <section class="search-section">
     <div class="search-box">
-        <div class="search-input-group">
-            <input type="text" placeholder="Назва книги">
-            <input type="text" placeholder="Автор">
-        </div>
+        <form method="get" action="{% url 'core:home' %}">
+            <div class="search-input-group">
+                <input type="text" name="search" placeholder="Назва книги або автор"
+                       value="{{ search_query|default:'' }}">
+                <button type="submit" class="btn-primary">Шукати</button>
+            </div>
+        </form>
         <div class="filters">
-            <button class="filter-btn">Фантастика</button>
-            <button class="filter-btn">Детектив</button>
-            <button class="filter-btn">Романтика</button>
-            <button class="filter-btn">Класика</button>
-            <button class="filter-btn">Фентезі</button>
+            <button class="filter-btn" onclick="filterByGenre('Фантастика')">Фантастика</button>
+            <button class="filter-btn" onclick="filterByGenre('Детектив')">Детектив</button>
+            <button class="filter-btn" onclick="filterByGenre('Романтика')">Романтика</button>
+            <button class="filter-btn" onclick="filterByGenre('Класика')">Класика</button>
+            <button class="filter-btn" onclick="filterByGenre('Фентезі')">Фентезі</button>
         </div>
     </div>
 </section>
 
-<!-- Books Catalog -->
+<!-- Books Catalog - реальні дані з БД -->
 <section class="container" id="catalog">
     <h2 class="section-title">{{ books_section_title }}</h2>
 
+    {% if db_books %}
     <div class="books-grid">
-        {% for book in books %}
-        <div class="book-card">
+        {% for book in db_books %}
+        <a href="{% url 'core:book_detail' book.id %}" class="book-card">
             <div class="book-cover">
-                <img src="{{ book.cover }}" alt="{{ book.title }}">
+                {% if book.cover_url %}
+                    <img src="{{ book.cover_url }}" alt="{{ book.title }}">
+                {% else %}
+                    📚
+                {% endif %}
             </div>
             <div class="book-title">{{ book.title }}</div>
             <div class="book-author">{{ book.author }}</div>
-        </div>
+        </a>
         {% endfor %}
     </div>
+    {% else %}
+    <div class="empty-state">
+        <p>📚 Книг поки що немає. Додайте їх через адмін-панель!</p>
+        {% if user.is_staff %}
+            <a href="{% url 'admin:core_book_add' %}" class="btn-primary">
+                Додати книгу
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
 </section>
 
-<!-- Popular Music -->
+<!-- Popular Music - реальні дані -->
+{% if top_music_db %}
 <section class="container">
-    <h2 class="section-title">{{ music_section_title }}</h2>
+    <h2 class="section-title">🎵 Популярна музика</h2>
     <div class="music-list">
-        {% for music in popular_music %}
-        <div class="music-item">
+        {% for music in top_music_db %}
+        <a href="{% url 'core:chapter_detail' music.chapter.book.id music.chapter.number %}"
+           class="music-item">
             <div class="music-cover">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                     stroke-linejoin="round">
                     <path d="M9 18V5l12-2v13"/>
                     <circle cx="6" cy="18" r="3"/>
                     <circle cx="18" cy="16" r="3"/>
                 </svg>
             </div>
             <div class="music-info">
-                <div class="music-title">{{music.title}}</div>
-                <div class="music-meta">{{music.meta}}</div>
+                <div class="music-title">{{ music.track_title }}</div>
+                <div class="music-meta">
+                    {{ music.artist }} • {{ music.chapter.book.title }} - Розділ {{ music.chapter.number }}
+                </div>
             </div>
             <div class="music-likes">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                     stroke-linejoin="round">
                     <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
                 </svg>
-                <span>{{music.likes}}</span>
+                <span>{{ music.likes_count }}</span>
             </div>
-        </div>
+        </a>
         {% endfor %}
     </div>
 </section>
+{% endif %}
 
 <!-- How It Works -->
 <section class="container">
@@ -107,5 +132,13 @@
         </div>
     </div>
 </section>
+
+<script>
+function filterByGenre(genre) {
+    const searchInput = document.querySelector('input[name="search"]');
+    searchInput.value = genre;
+    searchInput.form.submit();
+}
+</script>
 
 {% endblock %}
