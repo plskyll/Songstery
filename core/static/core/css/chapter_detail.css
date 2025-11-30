@@ -38,7 +38,6 @@
     margin-right: 0.5rem;
 }
 
-/* Навігація */
 .chapter-navigation {
     display: flex;
     gap: 1rem;
@@ -67,7 +66,6 @@
     margin-left: auto;
 }
 
-/* Музична секція */
 .music-section {
     margin-bottom: 3rem;
 }
@@ -100,7 +98,6 @@
     box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
 }
 
-/* Музичні айтеми */
 .music-list {
     display: flex;
     flex-direction: column;
@@ -182,7 +179,6 @@
     text-decoration: underline;
 }
 
-/* Дії з музикою */
 .music-actions {
     display: flex;
     flex-direction: column;
@@ -230,7 +226,6 @@
     transform: scale(1.1);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .music-content {
         flex-direction: column;

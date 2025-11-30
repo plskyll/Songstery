@@ -12,8 +12,6 @@ from .forms import (
 )
 
 
-# --- АУТЕНТИФІКАЦІЯ ---
-
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -26,8 +24,6 @@ def signup(request):
         form = SignUpForm()
     return render(request, 'registration/signup.html', {'form': form})
 
-
-# --- ГОЛОВНА ТА КНИГИ ---
 
 class HomeView(TemplateView):
     template_name = 'core/home.html'
@@ -48,7 +44,6 @@ class HomeView(TemplateView):
             books_qs = Book.objects.all()
             context['books_section_title'] = 'Популярні книги'
 
-        # Пагінація (по 8 книг на сторінку)
         paginator = Paginator(books_qs, 8)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -75,7 +70,6 @@ class BookDetailView(DetailView):
         book.views_count += 1
         book.save(update_fields=['views_count'])
 
-        # Фільтруємо розділи: автор бачить все, інші - тільки підтверджені
         if self.request.user == book.creator or self.request.user.is_staff:
             context['chapters'] = book.chapters.all()
         else:
@@ -124,8 +118,6 @@ def save_book(request, book_id):
         messages.success(request, 'Книгу додано до збережених')
     return redirect('core:book_detail', pk=book_id)
 
-
-# --- РОЗДІЛИ ---
 
 class ChapterDetailView(DetailView):
     model = Chapter
@@ -189,8 +181,6 @@ def add_chapters(request, book_id):
     return render(request, 'core/add_chapters.html', {'form': form, 'book': book})
 
 
-# --- МУЗИКА ---
-
 @login_required
 def add_music_recommendation(request, chapter_id):
     chapter = get_object_or_404(Chapter, id=chapter_id)
@@ -232,8 +222,6 @@ def delete_music(request, music_id):
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
-# --- ПЛЕЙЛИСТИ ---
-
 @login_required
 def create_playlist(request, book_id):
     book = get_object_or_404(Book, id=book_id)
@@ -254,7 +242,6 @@ def create_playlist(request, book_id):
     else:
         form = PlaylistForm()
 
-    # Передаємо список розділів для випадаючого списку
     chapters = book.chapters.all()
     return render(request, 'core/create_playlist.html', {
         'form': form,
@@ -267,7 +254,6 @@ def create_playlist(request, book_id):
 def add_track_to_playlist(request, pk):
     playlist = get_object_or_404(Playlist, pk=pk)
 
-    # Перевірка прав: тільки власник може додавати треки
     if request.user != playlist.creator:
         messages.error(request, "Тільки автор плейлиста може додавати треки")
         return redirect('core:playlist_detail', pk=pk)
@@ -315,8 +301,6 @@ def like_playlist(request, playlist_id):
     playlist.save()
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
-
-# --- ІНШЕ ---
 
 @login_required
 def add_comment(request):

@@ -120,7 +120,6 @@
     transform: translateY(-3px);
 }
 
-/* Розділи */
 .chapters-section {
     margin-bottom: 4rem;
 }
@@ -193,7 +192,6 @@
     font-size: 0.9rem;
 }
 
-/* Топ музика */
 .top-music-section {
     margin-bottom: 4rem;
 }
@@ -254,7 +252,6 @@
     background: #764ba2;
 }
 
-/* Плейлисти */
 .playlists-section {
     margin-bottom: 4rem;
 }
@@ -317,7 +314,6 @@
     margin-bottom: 1rem;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .book-header {
         grid-template-columns: 1fr;

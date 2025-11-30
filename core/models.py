@@ -4,7 +4,6 @@ from django.urls import reverse
 
 
 class Book(models.Model):
-    """Книга"""
     creator = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -17,7 +16,6 @@ class Book(models.Model):
     year = models.IntegerField(verbose_name="Рік")
     description = models.TextField(blank=True, verbose_name="Опис")
 
-    # Обкладинки: файл (пріоритет) або посилання
     cover_image = models.ImageField(
         upload_to='books/covers/',
         blank=True,
@@ -34,7 +32,7 @@ class Book(models.Model):
         return f"{self.title} - {self.author}"
 
     def get_cover(self):
-        """Повертає URL обкладинки: пріоритет у завантаженого файлу, потім посилання"""
+        """Return URL cover: priority cover_image > cover_url"""
         if self.cover_image:
             return self.cover_image.url
         if self.cover_url:
@@ -51,7 +49,6 @@ class Book(models.Model):
 
 
 class Chapter(models.Model):
-    """Розділ книги"""
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='chapters')
     title = models.CharField(max_length=255, verbose_name="Назва розділу")
     number = models.IntegerField(verbose_name="Номер")
@@ -62,7 +59,7 @@ class Chapter(models.Model):
         help_text="Наприклад: спокій, напруга, епічність"
     )
 
-    # Статус модерації (False = потребує перевірки адміном)
+    # Moderation status (False = need to adminstrator approve)
     is_approved = models.BooleanField(default=False, verbose_name="Підтверджено")
 
     def __str__(self):
@@ -81,7 +78,6 @@ class Chapter(models.Model):
 
 
 class MusicRecommendation(models.Model):
-    """Музична рекомендація"""
     LINK_TYPES = [
         ('youtube', 'YouTube'),
         ('spotify', 'Spotify'),
@@ -120,7 +116,6 @@ class MusicRecommendation(models.Model):
 
 
 class Playlist(models.Model):
-    """Плейлист"""
     title = models.CharField(max_length=255, verbose_name="Назва")
     description = models.TextField(blank=True, verbose_name="Опис")
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='playlists')
@@ -134,7 +129,6 @@ class Playlist(models.Model):
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     mood = models.CharField(max_length=200, blank=True)
 
-    # НОВЕ ПОЛЕ: Зовнішнє посилання
     external_link = models.URLField(blank=True, verbose_name="Посилання на плейлист (YouTube/Spotify)")
 
     likes_count = models.IntegerField(default=0)
@@ -154,7 +148,6 @@ class Playlist(models.Model):
 
 
 class PlaylistTrack(models.Model):
-    """Трек у плейлисті"""
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='tracks')
     track_title = models.CharField(max_length=255)
     artist = models.CharField(max_length=255)
@@ -167,7 +160,6 @@ class PlaylistTrack(models.Model):
 
 
 class Like(models.Model):
-    """Лайк"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     music_recommendation = models.ForeignKey(
         MusicRecommendation,
@@ -193,7 +185,6 @@ class Like(models.Model):
 
 
 class Comment(models.Model):
-    """Коментар"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField(verbose_name="Коментар")
     book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True, blank=True, related_name='comments')
@@ -207,7 +198,6 @@ class Comment(models.Model):
 
 
 class SavedBook(models.Model):
-    """Збережена книга"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

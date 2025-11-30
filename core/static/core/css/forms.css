@@ -27,7 +27,6 @@
     text-align: center;
 }
 
-/* Групи форм */
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -47,7 +46,6 @@
     margin-top: 0.4rem;
 }
 
-/* Інпути - ТІЛЬКИ з класом .form-input або всередині .form-box */
 .form-input,
 .form-select,
 .form-textarea,
@@ -67,7 +65,6 @@
     transition: all 0.3s ease;
 }
 
-/* Стилі при фокусі */
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus,
@@ -78,7 +75,6 @@
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
 }
 
-/* Стилізація File Input */
 .form-box input[type="file"] {
     padding: 0.7rem;
     background: rgba(102, 126, 234, 0.1);
@@ -105,7 +101,6 @@
     min-height: 120px;
 }
 
-/* Checkbox */
 .form-group.checkbox {
     display: flex;
     align-items: center;
@@ -125,7 +120,6 @@
     cursor: pointer;
 }
 
-/* Помилки */
 .error {
     display: block;
     color: #ff6b6b;
@@ -136,7 +130,6 @@
     border-radius: 8px;
 }
 
-/* Дії форми */
 .form-actions {
     display: flex;
     gap: 1rem;

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import MusicRecommendation, Playlist, Comment, Book, PlaylistTrack
 
-# Міксін для автоматичного додавання стилів до всіх полів
+
 class StyledFormMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -14,7 +14,6 @@ class StyledFormMixin:
                 existing_class = field.widget.attrs.get('class', '')
                 field.widget.attrs['class'] = f'{existing_class} form-input'.strip()
 
-# --- ФОРМИ ---
 
 class BookForm(StyledFormMixin, forms.ModelForm):
     class Meta:
@@ -25,6 +24,7 @@ class BookForm(StyledFormMixin, forms.ModelForm):
             'cover_url': forms.URLInput(attrs={'placeholder': 'https://...'}),
         }
 
+
 class SignUpForm(StyledFormMixin, UserCreationForm):
     email = forms.EmailField(required=True, label="Email")
 
@@ -32,12 +32,14 @@ class SignUpForm(StyledFormMixin, UserCreationForm):
         model = User
         fields = ('username', 'email', 'first_name', 'last_name')
 
+
 class UserUpdateForm(StyledFormMixin, forms.ModelForm):
     email = forms.EmailField()
 
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name']
+
 
 class MusicRecommendationForm(StyledFormMixin, forms.ModelForm):
     class Meta:
@@ -48,6 +50,7 @@ class MusicRecommendationForm(StyledFormMixin, forms.ModelForm):
             'link_type': forms.Select(attrs={'class': 'form-select'}),
         }
 
+
 class PlaylistForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = Playlist
@@ -55,6 +58,7 @@ class PlaylistForm(StyledFormMixin, forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3, 'class': 'form-textarea', 'placeholder': 'Опис плейлиста'}),
         }
+
 
 class PlaylistTrackForm(StyledFormMixin, forms.ModelForm):
     class Meta:
@@ -66,6 +70,7 @@ class PlaylistTrackForm(StyledFormMixin, forms.ModelForm):
             'link_url': forms.URLInput(attrs={'placeholder': 'Посилання на трек'}),
         }
 
+
 class CommentForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = Comment
@@ -73,6 +78,7 @@ class CommentForm(StyledFormMixin, forms.ModelForm):
         widgets = {
             'text': forms.Textarea(attrs={'rows': 3, 'class': 'form-textarea', 'placeholder': 'Ваш коментар...'})
         }
+
 
 class BulkChaptersForm(StyledFormMixin, forms.Form):
     number_of_chapters = forms.IntegerField(

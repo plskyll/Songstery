@@ -144,15 +144,12 @@ function showTab(tabName) {
     }
 }
 
-// Ініціалізація першого табу при завантаженні
 document.addEventListener('DOMContentLoaded', function() {
-    // Приховуємо всі крім першого
     document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
 
     const firstTab = document.getElementById('saved-tab');
     if(firstTab) firstTab.style.display = 'block';
 
-    // Активуємо кнопку
     const firstBtn = document.querySelector('.profile-tabs .tab');
     if(firstBtn) firstBtn.classList.add('active');
 });
