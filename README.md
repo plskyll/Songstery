@@ -93,7 +93,7 @@ source venv/bin/activate
 ### Крок 4: Встановлення залежностей
 
 ```bash
-pip install django
+pip install -r requirements.txt
 ```
 
 ### Крок 5: Виконання міграцій

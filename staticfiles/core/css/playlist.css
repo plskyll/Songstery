@@ -1,0 +1,136 @@
+.playlist-detail {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 5%;
+}
+
+.playlist-header {
+    display: flex;
+    gap: 2rem;
+    background: rgba(45, 53, 97, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 3rem;
+}
+
+.playlist-cover {
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    flex-shrink: 0;
+}
+
+.playlist-info {
+    flex: 1;
+}
+
+.playlist-info h1 {
+    font-size: 2rem;
+    color: #e8eaf6;
+    margin-bottom: 0.5rem;
+}
+
+.playlist-info .creator {
+    color: #9fa8b8;
+    margin-bottom: 1rem;
+}
+
+.playlist-info .description {
+    color: #b8c5d6;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+}
+
+.playlist-info .mood {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: rgba(102, 126, 234, 0.2);
+    border-radius: 20px;
+    color: #667eea;
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+
+.playlist-meta {
+    color: #7a8aa3;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.playlist-meta span {
+    margin-right: 1rem;
+}
+
+/* Треки */
+.tracks-section {
+    background: rgba(45, 53, 97, 0.6);
+    padding: 2rem;
+    border-radius: 20px;
+}
+
+.tracks-section h2 {
+    font-size: 1.8rem;
+    color: #e8eaf6;
+    margin-bottom: 1.5rem;
+}
+
+.tracks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.track-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(26, 31, 58, 0.6);
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.track-item:hover {
+    background: rgba(26, 31, 58, 0.8);
+}
+
+.track-number {
+    color: #7a8aa3;
+    font-weight: bold;
+    min-width: 30px;
+}
+
+.track-info {
+    flex: 1;
+}
+
+.track-info h3 {
+    color: #e8eaf6;
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+}
+
+.track-info p {
+    color: #9fa8b8;
+    font-size: 0.9rem;
+}
+
+.btn-play {
+    padding: 0.7rem 1.2rem;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    transition: all 0.3s;
+}
+
+.btn-play:hover {
+    background: #764ba2;
+    transform: scale(1.1);
+}
