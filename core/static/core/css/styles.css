@@ -14,7 +14,12 @@
 body {
     font-family: var(--font-main);
     color: var(--color-text-main);
-    /* ... інші властивості ... */
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 .logo {
@@ -48,17 +53,6 @@ html::before {
     height: 100%;
     background: linear-gradient(135deg, #1a1f3a 0%, #2d3561 50%, #1f2744 100%);
     z-index: -1;
-}
-
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #e8eaf6;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
 }
 
 main {
