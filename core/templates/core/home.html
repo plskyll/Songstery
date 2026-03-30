@@ -10,9 +10,9 @@
 {% if not user.is_authenticated and not search_query %}
 <section class="hero">
     <div class="hero-content">
-        <h1>Знайди музику до своєї улюбленої книги</h1>
-        <p>Поєднуй літературу та музику для створення особливого вайбу</p>
-        <a href="#catalog" class="btn-primary">Почати</a>
+        <h1>Find music for your favorite book</h1>
+        <p>Combine literature and music to create a special vibe</p>
+        <a href="#catalog" class="btn-primary">Start</a>
     </div>
 </section>
 {% endif %}
@@ -21,17 +21,17 @@
     <div class="search-box">
         <form method="get" action="{% url 'core:home' %}">
             <div class="search-input-group">
-                <input type="text" name="search" placeholder="Назва книги або автор"
+                <input type="text" name="search" placeholder="Book title or author"
                        value="{{ search_query|default:'' }}">
-                <button type="submit" class="btn-primary">Шукати</button>
+                <button type="submit" class="btn-primary">Search</button>
             </div>
         </form>
         {% if user.is_authenticated %}
         <div style="text-align: center; margin-top: 1rem;">
-            <p style="color: #9fa8b8; margin-bottom: 0.5rem;">Не знайшов книгу?</p>
+            <p style="color: #9fa8b8; margin-bottom: 0.5rem;">Did not find the book?</p>
             <a href="{% url 'core:create_book' %}" class="btn-primary" style="font-size: 0.9rem; padding: 0.5rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Додати нову книгу
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add new book
             </a>
         </div>
         {% endif %}
@@ -44,20 +44,22 @@
     {% if db_books %}
     <div class="books-grid">
         {% for book in db_books %}
-        <a href="{% url 'core:book_detail' book.id %}" class="book-card">
-            <div class="book-cover">
-                {% with cover=book.get_cover %}
-                    {% if cover %}
-                        <img src="{{ cover }}" alt="{{ book.title }}" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'no-cover\'><svg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'1\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M4 19.5A2.5 2.5 0 0 1 6.5 17H20\'></path><path d=\'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\'></path></svg></div>'">
-                    {% else %}
-                        <div class="no-cover">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                        </div>
-                    {% endif %}
-                {% endwith %}
-            </div>
-            <div class="book-title" title="{{ book.title }}">{{ book.title }}</div>
-            <div class="book-author">{{ book.author }}</div>
+        <a href="{% url 'core:book_detail' book.id %}" class="book-card" style="text-decoration: none;">
+            <article>
+                <div class="book-cover">
+                    {% with cover=book.get_cover %}
+                        {% if cover %}
+                            <img src="{{ cover }}" alt="{{ book.title }}" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'no-cover\'><svg aria-hidden=\'true\' xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'1\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M4 19.5A2.5 2.5 0 0 1 6.5 17H20\'></path><path d=\'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\'></path></svg></div>'">
+                        {% else %}
+                            <div class="no-cover">
+                                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                <h3 class="book-title" title="{{ book.title }}">{{ book.title }}</h3>
+                <p class="book-author">{{ book.author }}</p>
+            </article>
         </a>
         {% endfor %}
     </div>
@@ -65,15 +67,15 @@
     {% if page_obj.has_other_pages %}
     <div class="pagination" style="text-align: center; margin-top: 2rem;">
         {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}" class="btn-secondary">← Назад</a>
+            <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}" class="btn-secondary">&larr; Back</a>
         {% endif %}
 
         <span style="color: #b8c5d6; margin: 0 1rem;">
-            Сторінка {{ page_obj.number }} з {{ page_obj.paginator.num_pages }}
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
         </span>
 
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}" class="btn-secondary">Далі →</a>
+            <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}" class="btn-secondary">Next &rarr;</a>
         {% endif %}
     </div>
     {% endif %}
@@ -81,10 +83,10 @@
     {% else %}
     <div class="empty-state" style="text-align: center; padding: 3rem; background: rgba(45,53,97,0.4); border-radius: 15px;">
         <p style="color: #b8c5d6; font-size: 1.2rem; margin-bottom: 1.5rem;">
-            На жаль, за вашим запитом нічого не знайдено.
+            Unfortunately, nothing was found for your request.
         </p>
         <a href="{% url 'core:create_book' %}" class="btn-primary">
-            Створити книгу
+            Create book
         </a>
     </div>
     {% endif %}
@@ -93,24 +95,24 @@
 {% if top_music_db %}
 <section class="container">
     <h2 class="section-title" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-        Популярна музика
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+        Popular music
     </h2>
     <div class="music-list">
         {% for music in top_music_db %}
         <a href="{% url 'core:chapter_detail' music.chapter.book.id music.chapter.number %}"
            class="music-item">
             <div class="music-cover">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
             </div>
             <div class="music-info">
                 <div class="music-title">{{ music.track_title }}</div>
                 <div class="music-meta">
-                    {{ music.artist }} • {{ music.chapter.book.title }}
+                    {{ music.artist }} &bull; {{ music.chapter.book.title }}
                 </div>
             </div>
             <div class="music-likes">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 <span>{{ music.likes_count }}</span>
             </div>
         </a>
@@ -121,40 +123,39 @@
 
 <section class="container" id="howItWorksSection">
     <div class="how-it-works">
-        <h2 class="section-title">Як це працює</h2>
+        <h2 class="section-title">How it works</h2>
         <div class="steps">
             <div class="step">
                 <div class="step-number">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                 </div>
-                <div class="step-title">Обери книгу</div>
-                <div class="step-desc">Знайди свою улюблену книгу в нашому каталозі або додай нову</div>
+                <div class="step-title">Choose a book</div>
+                <div class="step-desc">Find your favorite book in our catalog or add a new one</div>
             </div>
             <div class="step">
                 <div class="step-number">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                 </div>
-                <div class="step-title">Знайди розділ</div>
-                <div class="step-desc">Перейди до конкретного розділу, який тебе надихнув</div>
+                <div class="step-title">Find a chapter</div>
+                <div class="step-desc">Go to the specific chapter that inspired you</div>
             </div>
             <div class="step">
                 <div class="step-number">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
                 </div>
-                <div class="step-title">Слухай музику</div>
-                <div class="step-desc">Поділися своїми музичними рекомендаціями або відкрий нові композиції</div>
+                <div class="step-title">Listen to music</div>
+                <div class="step-desc">Share your music recommendations or discover new tracks</div>
             </div>
         </div>
 
         <button onclick="hideHowItWorks()" class="btn-close-section">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
-            Не показувати більше
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+            Do not show again
         </button>
     </div>
 </section>
 
 <script>
-    // Перевіряємо, чи користувач вже приховав цю секцію
     document.addEventListener("DOMContentLoaded", function() {
         if (localStorage.getItem("hideHowItWorks") === "true") {
             document.getElementById("howItWorksSection").style.display = "none";
@@ -162,7 +163,6 @@
     });
 
     function hideHowItWorks() {
-        // Плавно приховуємо секцію
         const section = document.getElementById("howItWorksSection");
         section.style.opacity = "0";
         section.style.transition = "opacity 0.5s ease";
@@ -171,7 +171,6 @@
             section.style.display = "none";
         }, 500);
 
-        // Запам'ятовуємо вибір назавжди (в LocalStorage)
         localStorage.setItem("hideHowItWorks", "true");
     }
 </script>
