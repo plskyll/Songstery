@@ -1,21 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Add Book — Songstery{% endblock %}
+{% block title %}Register — Songstery{% endblock %}
 
 {% block content %}
 <div class="form-wrap">
-  <nav class="breadcrumbs">
-    <a href="{% url 'core:home' %}">Discover</a>
-    <span class="breadcrumbs__sep">/</span>
-    <span>Add Book</span>
-  </nav>
-
   <div class="form-box">
-    <div class="form-box__title">Add a new book</div>
-    <p class="form-box__subtitle">Add a book to the Songstery catalog</p>
+    <div class="form-box__title">Join Songstery</div>
+    <p class="form-box__subtitle">Create your free account and start sharing music</p>
 
-    <form method="post" enctype="multipart/form-data">
+    <form method="post">
       {% csrf_token %}
       {% for field in form %}
       <div class="form-group">
@@ -31,10 +25,14 @@
       {% endfor %}
 
       <div class="form-actions">
-        <button type="submit" class="btn btn-accent">Add Book</button>
-        <a href="{% url 'core:home' %}" class="btn btn-ghost">Cancel</a>
+        <button type="submit" class="btn btn-accent">Create Account</button>
       </div>
     </form>
+
+    <p class="text-sm text-muted mt-16" style="text-align:center;">
+      Already have an account?
+      <a href="{% url 'login' %}" style="color:var(--clr-accent); font-weight:500;">Sign in</a>
+    </p>
   </div>
 </div>
 {% endblock %}

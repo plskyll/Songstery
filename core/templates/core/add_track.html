@@ -1,43 +1,39 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'core/css/forms.css' %}">
-{% endblock %}
+{% block title %}Add Track — Songstery{% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <div class="breadcrumbs">
-        <a href="{% url 'core:home' %}">Головна</a> / 
-        <a href="{% url 'core:playlist_detail' playlist.id %}">{{ playlist.title }}</a> /
-        Додати трек
-    </div>
-    
-    <div class="form-box">
-        <h1 style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
-            Додати трек
-        </h1>
-        <p class="form-subtitle">До плейлиста "{{ playlist.title }}"</p>
-        
-        <form method="post">
-            {% csrf_token %}
-            
-            {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.errors %}
-                    <span class="error">{{ field.errors.0 }}</span>
-                {% endif %}
-            </div>
-            {% endfor %}
-            
-            <div class="form-actions">
-                <button type="submit" class="btn-primary">Додати трек</button>
-                <a href="{% url 'core:playlist_detail' playlist.id %}" class="btn-secondary">Скасувати</a>
-            </div>
-        </form>
-    </div>
+<div class="form-wrap">
+  <nav class="breadcrumbs">
+    <a href="{% url 'core:home' %}">Discover</a>
+    <span class="breadcrumbs__sep">/</span>
+    <a href="{% url 'core:playlist_detail' playlist.id %}">{{ playlist.title }}</a>
+    <span class="breadcrumbs__sep">/</span>
+    <span>Add Track</span>
+  </nav>
+
+  <div class="form-box">
+    <div class="form-box__title">Add a track</div>
+    <p class="form-box__subtitle">To "{{ playlist.title }}"</p>
+
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+          <span class="form-error">{{ field.errors.0 }}</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-accent">Add Track</button>
+        <a href="{% url 'core:playlist_detail' playlist.id %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
