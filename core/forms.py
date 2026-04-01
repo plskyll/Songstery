@@ -26,11 +26,25 @@ class BookForm(StyledFormMixin, forms.ModelForm):
 
 
 class SignUpForm(StyledFormMixin, UserCreationForm):
-    email = forms.EmailField(required=True, label="Email")
+    email = forms.EmailField(
+        required=True, 
+        label="Email",
+        widget=forms.EmailInput(attrs={'placeholder': 'example@mail.com'})
+    )
+    phone = forms.CharField(
+        required=True,
+        label="Phone number",
+        widget=forms.TextInput(attrs={
+            'type': 'tel',
+            'placeholder': '+380XXXXXXXXX',
+            'pattern': '^\+380[0-9]{9}$',
+            'title': 'Format: +380 and 9 digits'
+        })
+    )
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name')
+        fields = ('username', 'email', 'phone', 'first_name', 'last_name')
 
 
 class UserUpdateForm(StyledFormMixin, forms.ModelForm):
