@@ -2,35 +2,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Songstery{% endblock %}</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Songstery{% endblock %}</title>
 
-    <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'core/css/layout.css' %}">
-    <link rel="stylesheet" href="{% static 'core/css/components/buttons.css' %}">
-    <link rel="stylesheet" href="{% static 'core/css/components/cards.css' %}">
-    <link rel="stylesheet" href="{% static 'core/css/components/forms.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
 
-    <script src="https://unpkg.com/lucide@latest"></script>
-    {% block extra_css %}{% endblock %}
+  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+  {% block extra_css %}{% endblock %}
 </head>
 <body>
 
 {% include 'includes/_sidebar.html' %}
 
 <div class="main-content">
-    {% include 'includes/_topbar.html' %}
-    {% include 'includes/_messages.html' %}
+  {% include 'includes/_topbar.html' %}
+  {% include 'includes/_messages.html' %}
 
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
 
-    {% include 'includes/_footer.html' %}
+  {% include 'includes/_footer.html' %}
 </div>
 
-<div id="sidebarOverlay" style="display:none; position:fixed; inset:0; background:rgba(26,22,18,.4); z-index:99;"></div>
+<div id="sidebarOverlay"></div>
 
 <script src="{% static 'core/js/main.js' %}"></script>
 <script>lucide.createIcons();</script>
