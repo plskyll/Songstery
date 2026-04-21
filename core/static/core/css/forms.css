@@ -182,3 +182,20 @@
     border: 2px solid #ef4444;
     background-color: rgba(239, 68, 68, 0.05);
 }
+.form-box { background: var(--clr-surface); border: 1px solid var(--clr-border); border-radius: var(--radius-lg); padding: 36px; box-shadow: var(--shadow-sm); }
+.form-input, .form-box input[type="text"], .form-box select, .form-box textarea {
+    width: 100%; padding: 10px 14px; background: var(--clr-bg); border: 1px solid var(--clr-border);
+    border-radius: var(--radius-sm); font: inherit; transition: all var(--transition);
+}
+.form-input:focus { outline: none; border-color: var(--clr-accent); background: var(--clr-surface); }
+
+.form-wrap { max-width: 540px; margin: 0 auto; padding: 40px 20px; }
+.form-box { background: var(--clr-surface); border: 1px solid var(--clr-border); border-radius: var(--radius-lg); padding: 36px; box-shadow: var(--shadow-sm); }
+.form-box__title { font-family: var(--ff-display); font-size: 26px; font-weight: 600; margin-bottom: 4px; }
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+
+.form-input, .form-box input[type="text"], .form-box input[type="password"], .form-box input[type="email"], .form-box select, .form-box textarea {
+  width: 100%; padding: 9px 13px; background: var(--clr-bg); border: 1px solid var(--clr-border); border-radius: var(--radius-sm); font: inherit; transition: all var(--transition);
+}
+.form-input:focus { border-color: var(--clr-accent); background: var(--clr-surface); outline: none; box-shadow: 0 0 0 3px rgba(196,98,45,.12); }

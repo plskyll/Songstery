@@ -1,0 +1,9 @@
+{% if messages %}
+<div class="content-pad-sm" style="padding-bottom:0;">
+    <div class="messages-list">
+        {% for msg in messages %}
+        <div class="alert alert--{{ msg.tags|default:'info' }}">{{ msg }}</div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

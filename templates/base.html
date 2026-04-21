@@ -2,142 +2,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Songstery{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
-  {% block extra_css %}{% endblock %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Songstery{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components/buttons.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components/cards.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components/forms.css' %}">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar__logo">
-      <a href="{% url 'core:home' %}">
-        <span class="logo-word">Songstery</span>
-        <div class="logo-tagline">Books &amp; Music</div>
-      </a>
-    </div>
+{% include 'includes/_sidebar.html' %}
 
-    <nav class="sidebar__nav">
-      <span class="sidebar__section-label">Browse</span>
-      <a href="{% url 'core:home' %}" class="nav-link {% block nav_discover %}{% endblock %}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        Discover
-      </a>
-      <a href="{% url 'core:home' %}#catalog" class="nav-link {% block nav_catalog %}{% endblock %}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        Catalog
-      </a>
+<div class="main-content">
+    {% include 'includes/_topbar.html' %}
+    {% include 'includes/_messages.html' %}
 
-      {% if user.is_authenticated %}
-      <span class="sidebar__section-label">My Space</span>
-      <a href="{% url 'core:profile' %}" class="nav-link {% block nav_library %}{% endblock %}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
-        My Library
-      </a>
-      <a href="{% url 'core:profile' %}" class="nav-link {% block nav_playlists %}{% endblock %}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        Playlists
-      </a>
-      {% endif %}
-    </nav>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 
-    <div class="sidebar__footer">
-      {% if user.is_authenticated %}
-        <a href="{% url 'core:profile' %}" class="sidebar__user">
-          <div class="user-avatar">{{ user.username|first|upper }}</div>
-          <div>
-            <div class="user-name">{{ user.username }}</div>
-            <div class="user-role">Member</div>
-          </div>
-        </a>
-        <form action="{% url 'logout' %}" method="post" style="margin-top:8px;">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-ghost btn-sm" style="width:100%; justify-content:center;">
-            Sign out
-          </button>
-        </form>
-      {% else %}
-        <a href="{% url 'login' %}" class="btn btn-accent btn-sm" style="width:100%; justify-content:center;">Sign in</a>
-        <a href="{% url 'signup' %}" class="btn btn-ghost btn-sm" style="width:100%; justify-content:center; margin-top:8px;">Register</a>
-      {% endif %}
-    </div>
-  </aside>
+    {% include 'includes/_footer.html' %}
+</div>
 
-  <!-- Main area -->
-  <div class="main-content">
+<div id="sidebarOverlay" style="display:none; position:fixed; inset:0; background:rgba(26,22,18,.4); z-index:99;"></div>
 
-    <!-- Top bar -->
-    <header class="topbar">
-      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menu">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-
-      <form class="topbar__search" action="{% url 'core:home' %}" method="get">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" name="search" placeholder="Search books or authors…" value="{{ search_query|default:'' }}">
-      </form>
-
-      <div class="topbar__actions">
-        {% if user.is_authenticated %}
-          <a href="{% url 'core:create_book' %}" class="btn btn-accent btn-sm">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Book
-          </a>
-        {% else %}
-          <a href="{% url 'login' %}" class="btn btn-ghost btn-sm">Sign in</a>
-          <a href="{% url 'signup' %}" class="btn btn-accent btn-sm">Register</a>
-        {% endif %}
-      </div>
-    </header>
-
-    <!-- Flash messages -->
-    {% if messages %}
-    <div class="content-pad-sm" style="padding-bottom:0;">
-      <div class="messages-list">
-        {% for msg in messages %}
-          <div class="alert alert--{{ msg.tags|default:'info' }}">{{ msg }}</div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
-    <main>{% block content %}{% endblock %}</main>
-
-    <!-- Footer -->
-    <footer>
-      <span>© 2025 Songstery — Where books meet music</span>
-      <div class="footer__links">
-        <a href="#">Help</a>
-        <a href="#">Terms</a>
-        <a href="#">Privacy</a>
-        <a href="#">Contact</a>
-      </div>
-    </footer>
-  </div>
-
-  <!-- Sidebar overlay for mobile -->
-  <div id="sidebarOverlay" style="display:none; position:fixed; inset:0; background:rgba(26,22,18,.4); z-index:99;"></div>
-
-  <script>
-    const sidebar = document.getElementById('sidebar');
-    const toggle  = document.getElementById('sidebarToggle');
-    const overlay = document.getElementById('sidebarOverlay');
-
-    function openSidebar() {
-      sidebar.classList.add('open');
-      overlay.style.display = 'block';
-    }
-    function closeSidebar() {
-      sidebar.classList.remove('open');
-      overlay.style.display = 'none';
-    }
-
-    toggle?.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
-    overlay.addEventListener('click', closeSidebar);
-  </script>
-
-  {% block extra_js %}{% endblock %}
+<script src="{% static 'core/js/main.js' %}"></script>
+<script>lucide.createIcons();</script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>
