@@ -1,39 +1,39 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Add Track — Songstery{% endblock %}
+{% block title %}Add Track — {{ SITE_NAME }}{% endblock %}
 
 {% block content %}
-<div class="form-wrap">
-  <nav class="breadcrumbs">
-    <a href="{% url 'core:home' %}">Discover</a>
-    <span class="breadcrumbs__sep">/</span>
-    <a href="{% url 'core:playlist_detail' playlist.id %}">{{ playlist.title }}</a>
-    <span class="breadcrumbs__sep">/</span>
-    <span>Add Track</span>
-  </nav>
+    <div class="form-wrap">
+        <nav class="breadcrumbs">
+            <a href="{% url 'core:home' %}">Discover</a>
+            <span class="breadcrumbs__sep">/</span>
+            <a href="{% url 'core:playlist_detail' playlist.id %}">{{ playlist.title }}</a>
+            <span class="breadcrumbs__sep">/</span>
+            <span>Add Track</span>
+        </nav>
 
-  <div class="form-box">
-    <div class="form-box__title">Add a track</div>
-    <p class="form-box__subtitle">To "{{ playlist.title }}"</p>
+        <div class="form-box">
+            <div class="form-box__title">Add a track</div>
+            <p class="form-box__subtitle">To "{{ playlist.title }}"</p>
 
-    <form method="post">
-      {% csrf_token %}
-      {% for field in form %}
-      <div class="form-group">
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% if field.errors %}
-          <span class="form-error">{{ field.errors.0 }}</span>
-        {% endif %}
-      </div>
-      {% endfor %}
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <span class="form-error">{{ field.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
 
-      <div class="form-actions">
-        <button type="submit" class="btn btn-accent">Add Track</button>
-        <a href="{% url 'core:playlist_detail' playlist.id %}" class="btn btn-ghost">Cancel</a>
-      </div>
-    </form>
-  </div>
-</div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-accent">Add Track</button>
+                    <a href="{% url 'core:playlist_detail' playlist.id %}" class="btn btn-ghost">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}

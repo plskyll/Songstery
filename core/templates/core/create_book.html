@@ -1,40 +1,40 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Add Book — Songstery{% endblock %}
+{% block title %}Add Book — {{ SITE_NAME }} {% endblock %}
 
 {% block content %}
-<div class="form-wrap">
-  <nav class="breadcrumbs">
-    <a href="{% url 'core:home' %}">Discover</a>
-    <span class="breadcrumbs__sep">/</span>
-    <span>Add Book</span>
-  </nav>
+    <div class="form-wrap">
+        <nav class="breadcrumbs">
+            <a href="{% url 'core:home' %}">Discover</a>
+            <span class="breadcrumbs__sep">/</span>
+            <span>Add Book</span>
+        </nav>
 
-  <div class="form-box">
-    <div class="form-box__title">Add a new book</div>
-    <p class="form-box__subtitle">Add a book to the Songstery catalog</p>
+        <div class="form-box">
+            <div class="form-box__title">Add a new book</div>
+            <p class="form-box__subtitle">Add a book to the {{ SITE_NAME }} catalog</p>
 
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      {% for field in form %}
-      <div class="form-group">
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% if field.errors %}
-          <span class="form-error">{{ field.errors.0 }}</span>
-        {% endif %}
-        {% if field.help_text %}
-          <small>{{ field.help_text }}</small>
-        {% endif %}
-      </div>
-      {% endfor %}
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <span class="form-error">{{ field.errors.0 }}</span>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <small>{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
 
-      <div class="form-actions">
-        <button type="submit" class="btn btn-accent">Add Book</button>
-        <a href="{% url 'core:home' %}" class="btn btn-ghost">Cancel</a>
-      </div>
-    </form>
-  </div>
-</div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-accent">Add Book</button>
+                    <a href="{% url 'core:home' %}" class="btn btn-ghost">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}

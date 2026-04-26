@@ -1,299 +1,150 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Profile — Songstery{% endblock %}
+{% block title %}Profile — {{ SITE_NAME }}{% endblock %}
 {% block nav_library %}active{% endblock %}
 
 {% block extra_css %}
-<style>
-  .profile-wrap { padding: 36px; }
-
-  .profile-head {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    margin-bottom: 32px;
-    padding-bottom: 28px;
-    border-bottom: 1px solid var(--clr-border);
-  }
-
-  .profile-avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: var(--clr-accent);
-    color: #fff;
-    font-family: var(--ff-display);
-    font-size: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .profile-head__name {
-    font-family: var(--ff-display);
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--clr-ink);
-  }
-
-  .profile-head__username { font-size: 14px; color: var(--clr-muted); margin-top: 2px; }
-
-  /* ── Tab system ─────────────────────────── */
-  .tab-bar {
-    display: flex;
-    gap: 2px;
-    border-bottom: 1px solid var(--clr-border);
-    margin-bottom: 28px;
-  }
-
-  .tab-btn {
-    padding: 10px 18px;
-    font-size: 13.5px;
-    font-weight: 500;
-    color: var(--clr-muted);
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    transition: all var(--transition);
-    background: none;
-    cursor: pointer;
-    border-top: none;
-    border-left: none;
-    border-right: none;
-  }
-
-  .tab-btn:hover { color: var(--clr-ink); }
-
-  .tab-btn.active {
-    color: var(--clr-accent);
-    border-bottom-color: var(--clr-accent);
-  }
-
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  /* ── Edit form ──────────────────────────── */
-  .edit-panel {
-    background: var(--clr-surface);
-    border: 1px solid var(--clr-border);
-    border-radius: var(--radius-md);
-    padding: 24px;
-    margin-bottom: 32px;
-  }
-
-  .edit-panel__title {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--clr-ink);
-    margin-bottom: 18px;
-  }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  /* ── Book grid ──────────────────────────── */
-  .profile-books-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 24px 16px;
-  }
-
-  /* ── List items ─────────────────────────── */
-  .list-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 14px;
-    background: var(--clr-surface);
-    border: 1px solid var(--clr-border);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    color: inherit;
-    transition: all var(--transition);
-    margin-bottom: 8px;
-  }
-
-  .list-item:hover {
-    border-color: var(--clr-accent);
-    transform: translateX(3px);
-  }
-
-  .list-item__title {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--clr-ink);
-  }
-
-  .list-item__sub { font-size: 12px; color: var(--clr-muted); margin-top: 2px; }
-
-  .list-item__stat {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12.5px;
-    color: var(--clr-muted);
-    flex-shrink: 0;
-  }
-
-  @media (max-width: 700px) {
-    .profile-wrap { padding: 20px; }
-    .form-grid { grid-template-columns: 1fr; }
-  }
-</style>
+    <link rel="stylesheet" href="{% static 'core/css/pages/profile.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="profile-wrap">
+    <div class="profile-wrap">
 
-  <!-- Profile header -->
-  <div class="profile-head">
-    <div class="profile-avatar">{{ user.username|first|upper }}</div>
-    <div>
-      <div class="profile-head__name">
-        {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}
-      </div>
-      <div class="profile-head__username">@{{ user.username }}</div>
-    </div>
-  </div>
-
-  <!-- Edit profile form -->
-  <div class="edit-panel">
-    <div class="edit-panel__title">Edit Profile</div>
-    <form method="post">
-      {% csrf_token %}
-      <div class="form-grid">
-        {% for field in form %}
-        <div class="form-group">
-          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-          {{ field }}
-          {% if field.errors %}
-            <span class="form-error">{{ field.errors.0 }}</span>
-          {% endif %}
-        </div>
-        {% endfor %}
-      </div>
-      <div class="mt-16">
-        <button type="submit" class="btn btn-accent btn-sm">Save Changes</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Tabs -->
-  <div class="tab-bar">
-    <button class="tab-btn active" data-tab="saved">
-      Saved Books ({{ saved_books.count }})
-    </button>
-    <button class="tab-btn" data-tab="playlists">
-      Playlists ({{ my_playlists.count }})
-    </button>
-    <button class="tab-btn" data-tab="music">
-      My Recommendations ({{ my_recommendations.count }})
-    </button>
-  </div>
-
-  <!-- Saved books -->
-  <div class="tab-panel active" id="tab-saved">
-    {% if saved_books %}
-      <div class="profile-books-grid">
-        {% for saved in saved_books %}
-        <a href="{% url 'core:book_detail' saved.book.id %}" class="book-card">
-          <div class="book-card__spine-wrap">
-            <div class="book-card__cover">
-              {% with cover=saved.book.get_cover %}
-                {% if cover %}
-                  <img src="{{ cover }}" alt="{{ saved.book.title }}" loading="lazy"
-                       onerror="this.parentElement.innerHTML='<div class=\'book-card__no-cover\'>{{ saved.book.title|truncatechars:30 }}</div>'">
-                {% else %}
-                  <div class="book-card__no-cover">{{ saved.book.title|truncatechars:40 }}</div>
-                {% endif %}
-              {% endwith %}
+        <div class="profile-head">
+            <div class="profile-avatar">{{ user.username|first|upper }}</div>
+            <div>
+                <div class="profile-head__name">
+                    {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}
+                </div>
+                <div class="profile-head__username">@{{ user.username }}</div>
             </div>
-          </div>
-          <div class="book-card__meta">
-            <div class="book-card__title">{{ saved.book.title }}</div>
-            <div class="book-card__author">{{ saved.book.author }}</div>
-          </div>
-        </a>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="empty-state">
-        <div class="empty-state__icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
         </div>
-        <div class="empty-state__title">No saved books</div>
-        <p class="empty-state__text">Browse the catalog and save books you love.</p>
-        <a href="{% url 'core:home' %}" class="btn btn-accent">Discover Books</a>
-      </div>
-    {% endif %}
-  </div>
 
-  <!-- Playlists -->
-  <div class="tab-panel" id="tab-playlists">
-    {% if my_playlists %}
-      {% for playlist in my_playlists %}
-      <a href="{% url 'core:playlist_detail' playlist.id %}" class="list-item">
-        <div>
-          <div class="list-item__title">{{ playlist.title }}</div>
-          <div class="list-item__sub">{{ playlist.book.title }}</div>
+        <div class="edit-panel">
+            <div class="edit-panel__title">Edit Profile</div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-grid">
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <span class="form-error">{{ field.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-16">
+                    <button type="submit" class="btn btn-accent btn-sm">Save Changes</button>
+                </div>
+            </form>
         </div>
-        <div class="list-item__stat">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          {{ playlist.likes_count }}
-        </div>
-      </a>
-      {% endfor %}
-    {% else %}
-      <div class="empty-state">
-        <div class="empty-state__icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        </div>
-        <div class="empty-state__title">No playlists yet</div>
-        <p class="empty-state__text">Create playlists for your favorite books.</p>
-      </div>
-    {% endif %}
-  </div>
 
-  <!-- My recommendations -->
-  <div class="tab-panel" id="tab-music">
-    {% if my_recommendations %}
-      {% for music in my_recommendations %}
-      <div class="list-item" style="cursor:default;">
-        <div>
-          <div class="list-item__title">{{ music.track_title }}</div>
-          <div class="list-item__sub">{{ music.artist }} · {{ music.chapter.book.title }} — Ch. {{ music.chapter.number }}</div>
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="saved">
+                Saved Books ({{ saved_books.count }})
+            </button>
+            <button class="tab-btn" data-tab="playlists">
+                Playlists ({{ my_playlists.count }})
+            </button>
+            <button class="tab-btn" data-tab="music">
+                My Recommendations ({{ my_recommendations.count }})
+            </button>
         </div>
-        <div class="list-item__stat">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          {{ music.likes_count }}
-        </div>
-      </div>
-      {% endfor %}
-    {% else %}
-      <div class="empty-state">
-        <div class="empty-state__icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        </div>
-        <div class="empty-state__title">No recommendations yet</div>
-        <p class="empty-state__text">Find a chapter and share what you were listening to.</p>
-      </div>
-    {% endif %}
-  </div>
 
-</div>
+        <div class="tab-panel active" id="tab-saved">
+            {% if saved_books %}
+                <div class="profile-books-grid">
+                    {% for saved in saved_books %}
+                        <a href="{% url 'core:book_detail' saved.book.id %}" class="book-card">
+                            <div class="book-card__spine-wrap">
+                                <div class="book-card__cover">
+                                    {% with cover=saved.book.get_cover %}
+                                        {% if cover %}
+                                            <img src="{{ cover }}" alt="{{ saved.book.title }}" loading="lazy"
+                                                 onerror="this.parentElement.innerHTML='<div class=\'book-card__no-cover\'>{{ saved.book.title|truncatechars:30 }}</div>'">
+                                        {% else %}
+                                            <div class="book-card__no-cover">{{ saved.book.title|truncatechars:40 }}</div>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                            <div class="book-card__meta">
+                                <div class="book-card__title">{{ saved.book.title }}</div>
+                                <div class="book-card__author">{{ saved.book.author }}</div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state__icon">
+                        <i data-lucide="bookmark" style="width:22px;height:22px;"></i>
+                    </div>
+                    <div class="empty-state__title">No saved books</div>
+                    <p class="empty-state__text">Browse the catalog and save books you love.</p>
+                    <a href="{% url 'core:home' %}" class="btn btn-accent">Discover Books</a>
+                </div>
+            {% endif %}
+        </div>
 
-<script>
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-    });
-  });
-</script>
+        <div class="tab-panel" id="tab-playlists">
+            {% if my_playlists %}
+                {% for playlist in my_playlists %}
+                    <a href="{% url 'core:playlist_detail' playlist.id %}" class="list-item">
+                        <div>
+                            <div class="list-item__title">{{ playlist.title }}</div>
+                            <div class="list-item__sub">{{ playlist.book.title }}</div>
+                        </div>
+                        <div class="list-item__stat">
+                            <i data-lucide="heart" style="width:12px;height:12px;"></i>
+                            {{ playlist.likes_count }}
+                        </div>
+                    </a>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state__icon">
+                        <i data-lucide="music" style="width:22px;height:22px;"></i>
+                    </div>
+                    <div class="empty-state__title">No playlists yet</div>
+                    <p class="empty-state__text">Create playlists for your favorite books.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="tab-panel" id="tab-music">
+            {% if my_recommendations %}
+                {% for music in my_recommendations %}
+                    <div class="list-item" style="cursor:default;">
+                        <div>
+                            <div class="list-item__title">{{ music.track_title }}</div>
+                            <div class="list-item__sub">
+                                {{ music.artist }} · {{ music.chapter.book.title }} — Ch. {{ music.chapter.number }}
+                            </div>
+                        </div>
+                        <div class="list-item__stat">
+                            <i data-lucide="heart" style="width:12px;height:12px;"></i>
+                            {{ music.likes_count }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state__icon">
+                        <i data-lucide="music" style="width:22px;height:22px;"></i>
+                    </div>
+                    <div class="empty-state__title">No recommendations yet</div>
+                    <p class="empty-state__text">Find a chapter and share what you were listening to.</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'core/js/profile.js' %}"></script>
 {% endblock %}

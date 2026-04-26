@@ -1,38 +1,38 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Register — Songstery{% endblock %}
+{% block title %}Register — {{ SITE_NAME }}{% endblock %}
 
 {% block content %}
-<div class="form-wrap">
-  <div class="form-box">
-    <div class="form-box__title">Join Songstery</div>
-    <p class="form-box__subtitle">Create your free account and start sharing music</p>
+    <div class="form-wrap">
+        <div class="form-box">
+            <div class="form-box__title">Join {{ SITE_NAME }}</div>
+            <p class="form-box__subtitle">Create your free account and start sharing music</p>
 
-    <form method="post">
-      {% csrf_token %}
-      {% for field in form %}
-      <div class="form-group">
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% if field.errors %}
-          <span class="form-error">{{ field.errors.0 }}</span>
-        {% endif %}
-        {% if field.help_text %}
-          <small>{{ field.help_text }}</small>
-        {% endif %}
-      </div>
-      {% endfor %}
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <span class="form-error">{{ field.errors.0 }}</span>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <small>{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
 
-      <div class="form-actions">
-        <button type="submit" class="btn btn-accent">Create Account</button>
-      </div>
-    </form>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-accent">Create Account</button>
+                </div>
+            </form>
 
-    <p class="text-sm text-muted mt-16" style="text-align:center;">
-      Already have an account?
-      <a href="{% url 'login' %}" style="color:var(--clr-accent); font-weight:500;">Sign in</a>
-    </p>
-  </div>
-</div>
+            <p class="text-sm text-muted mt-16" style="text-align:center;">
+                Already have an account?
+                <a href="{% url 'login' %}" style="color:var(--clr-accent); font-weight:500;">Sign in</a>
+            </p>
+        </div>
+    </div>
 {% endblock %}
