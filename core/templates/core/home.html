@@ -9,7 +9,6 @@
 {% endblock %}
 
 {% block content %}
-
     {% if not user.is_authenticated and not search_query %}
         <section class="hero">
             <div class="hero__eyebrow">
@@ -52,58 +51,26 @@
 
     <section class="section-wrap" id="catalog">
         <div class="section-head">
-            <div class="filters-container flex gap-12 mb-24" style="flex-wrap: wrap;">
-                <button class="btn btn-primary filter-btn" data-filter="all">Всі</button>
-                <button class="btn btn-ghost filter-btn" data-filter="Fantasy">Fantasy</button>
-                <button class="btn btn-ghost filter-btn" data-filter="Romance">Romance</button>
-                <button class="btn btn-ghost filter-btn" data-filter="Detective">Detective</button>
-            </div>
-            <h2 class="section-head__title">{{ books_section_title }}</h2>
-            {% if user.is_authenticated %}
-                <a href="{% url 'core:create_book' %}" class="btn btn-ghost btn-sm">
-                    <i data-lucide="plus" style="width:13px;height:13px;"></i>
-                    Add Book
-                </a>
-            {% endif %}
+            <h2 class="section-head__title">Catalog (Dynamic Fetch)</h2>
         </div>
 
-        {% if db_books %}
-            <div class="books-grid">
-                {% for book in db_books %}
-                    {% include 'includes/_book_card.html' with book=book %}
-                {% endfor %}
-            </div>
+        <div class="filters-container flex gap-12 mb-24" style="flex-wrap: wrap;">
+            <button class="btn btn-primary filter-btn" data-filter="all">All</button>
+            <button class="btn btn-ghost filter-btn" data-filter="Fantasy">Fantasy</button>
+            <button class="btn btn-ghost filter-btn" data-filter="Romance">Romance</button>
+            <button class="btn btn-ghost filter-btn" data-filter="Detective">Detective</button>
+            <button class="btn btn-ghost filter-btn" data-filter="Sci-Fi">Sci-Fi</button>
+        </div>
 
-            {% if page_obj.has_other_pages %}
-                <div class="pagination">
-                    {% if page_obj.has_previous %}
-                        <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}"
-                           class="btn btn-ghost btn-sm">
-                            <i data-lucide="arrow-left" style="width:13px;height:13px;"></i> Previous
-                        </a>
-                    {% endif %}
-                    <span class="pagination__info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                    {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}"
-                           class="btn btn-ghost btn-sm">
-                            Next <i data-lucide="arrow-right" style="width:13px;height:13px;"></i>
-                        </a>
-                    {% endif %}
-                </div>
-            {% endif %}
+        <div id="loader" class="loader-container" style="display: none;">
+            <div class="spinner"></div>
+            <div>Завантаження даних...</div>
+        </div>
 
-        {% else %}
-            <div class="search-empty">
-                <div class="empty-state__icon" style="margin: 0 auto 14px;">
-                    <i data-lucide="book" style="width:24px;height:24px;"></i>
-                </div>
-                <div class="empty-state__title mb-8">No books found</div>
-                <p class="empty-state__text">Nothing matched your search. Try a different title or author.</p>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'core:create_book' %}" class="btn btn-accent">Add This Book</a>
-                {% endif %}
-            </div>
-        {% endif %}
+        <div id="error-container"></div>
+
+        <div id="items-grid" class="books-grid"></div>
+
     </section>
 
     {% if top_music_db %}

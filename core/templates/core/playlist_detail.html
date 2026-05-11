@@ -24,7 +24,7 @@
                 <i data-lucide="music" style="width:40px;height:40px;"></i>
             </div>
 
-            <div style="flex:1;min-width:0;">
+            <div class="playlist-hero__body">
                 <h1 class="playlist-hero__title">{{ playlist.title }}</h1>
                 <div class="playlist-hero__creator">by {{ playlist.creator.username }}</div>
 
@@ -91,11 +91,12 @@
                     </div>
                 {% endfor %}
             {% else %}
-                <div style="padding:32px;text-align:center;">
+                <div class="tracks-empty">
                     <p class="text-muted text-sm">No tracks yet.</p>
                     {% if user == playlist.creator %}
-                        <a href="{% url 'core:add_track' playlist.id %}"
-                           class="btn btn-accent btn-sm mt-12">Add First Track</a>
+                        <a href="{% url 'core:add_track' playlist.id %}" class="btn btn-accent btn-sm mt-12">
+                            Add First Track
+                        </a>
                     {% endif %}
                 </div>
             {% endif %}

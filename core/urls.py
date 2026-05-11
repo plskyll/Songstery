@@ -21,5 +21,8 @@ urlpatterns = [
     path('playlist/<int:playlist_id>/like/', views.like_playlist, name='like_playlist'),
     path('playlist/<int:pk>/add-track/', views.add_track_to_playlist, name='add_track'),
 
+    path('comments/add/', views.add_comment, name='add_comment'),
+    path('comments/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
+
     path('profile/', views.profile, name='profile'),
 ]
