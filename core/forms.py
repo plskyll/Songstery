@@ -20,31 +20,32 @@ class BookForm(StyledFormMixin, forms.ModelForm):
         model = Book
         fields = ['title', 'author', 'year', 'genre', 'description', 'cover_image', 'cover_url']
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-textarea', 'placeholder': 'Про що ця книга?'}),
+            'description': forms.Textarea(attrs={
+                'rows': 4,
+                'class': 'form-textarea',
+                'placeholder': 'Про що ця книга?',
+            }),
             'cover_url': forms.URLInput(attrs={'placeholder': 'https://...'}),
         }
 
 
 class SignUpForm(StyledFormMixin, UserCreationForm):
     email = forms.EmailField(
-        required=True, 
-        label="Email",
-        widget=forms.EmailInput(attrs={'placeholder': 'example@mail.com'})
-    )
-    phone = forms.CharField(
         required=True,
-        label="Phone number",
-        widget=forms.TextInput(attrs={
-            'type': 'tel',
-            'placeholder': '+380XXXXXXXXX',
-            'pattern': '^\+380[0-9]{9}$',
-            'title': 'Format: +380 and 9 digits'
-        })
+        label="Email",
+        widget=forms.EmailInput(attrs={'placeholder': 'example@mail.com'}),
     )
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'phone', 'first_name', 'last_name')
+        fields = ('username', 'email', 'first_name', 'last_name')
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        if commit:
+            user.save()
+        return user
 
 
 class UserUpdateForm(StyledFormMixin, forms.ModelForm):
@@ -60,7 +61,11 @@ class MusicRecommendationForm(StyledFormMixin, forms.ModelForm):
         model = MusicRecommendation
         fields = ['track_title', 'artist', 'link_type', 'link_url', 'embed_code', 'comment']
         widgets = {
-            'comment': forms.Textarea(attrs={'rows': 3, 'class': 'form-textarea', 'placeholder': 'Чому саме ця музика?'}),
+            'comment': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'form-textarea',
+                'placeholder': 'Чому саме ця музика?',
+            }),
             'link_type': forms.Select(attrs={'class': 'form-select'}),
         }
 
@@ -70,7 +75,11 @@ class PlaylistForm(StyledFormMixin, forms.ModelForm):
         model = Playlist
         fields = ['title', 'description', 'mood', 'external_link', 'is_public']
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 3, 'class': 'form-textarea', 'placeholder': 'Опис плейлиста'}),
+            'description': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'form-textarea',
+                'placeholder': 'Опис плейлиста',
+            }),
         }
 
 
@@ -90,7 +99,11 @@ class CommentForm(StyledFormMixin, forms.ModelForm):
         model = Comment
         fields = ['text']
         widgets = {
-            'text': forms.Textarea(attrs={'rows': 3, 'class': 'form-textarea', 'placeholder': 'Ваш коментар...'})
+            'text': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'form-textarea',
+                'placeholder': 'Ваш коментар...',
+            }),
         }
 
 
@@ -99,5 +112,5 @@ class BulkChaptersForm(StyledFormMixin, forms.Form):
         min_value=1,
         max_value=100,
         label="Кількість розділів",
-        widget=forms.NumberInput(attrs={'placeholder': 'Наприклад: 10'})
+        widget=forms.NumberInput(attrs={'placeholder': 'Наприклад: 10'}),
     )

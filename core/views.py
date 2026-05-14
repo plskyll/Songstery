@@ -3,8 +3,9 @@ from django.views.generic import TemplateView, DetailView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import F, Q
 from django.core.paginator import Paginator
+from django.http import HttpResponseNotAllowed
 
 from .models import Book, Chapter, MusicRecommendation, Playlist, Like, SavedBook, Comment
 from .forms import (
@@ -84,8 +85,11 @@ class BookDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         book = self.object
-        book.views_count += 1
-        book.save(update_fields=['views_count'])
+
+        session_key = f'viewed_book_{book.pk}'
+        if not self.request.session.get(session_key):
+            Book.objects.filter(pk=book.pk).update(views_count=F('views_count') + 1)
+            self.request.session[session_key] = True
 
         if self.request.user == book.creator or self.request.user.is_staff:
             context['chapters'] = book.chapters.all()
@@ -114,27 +118,40 @@ class ChapterDetailView(DetailView):
     context_object_name = 'chapter'
 
     def get_object(self):
-        return get_object_or_404(
+        chapter = get_object_or_404(
             Chapter,
             book_id=self.kwargs['book_id'],
             number=self.kwargs['chapter_num']
         )
+        user = self.request.user
+        if not chapter.is_approved and not (user == chapter.book.creator or user.is_staff):
+            from django.http import Http404
+            raise Http404
+        return chapter
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         chapter = self.object
+
         context['music_recommendations'] = chapter.music_recommendations.select_related('user')
         context['playlists'] = chapter.playlists.filter(is_public=True)
         context['comments'] = chapter.comments.filter(
             parent=None
         ).select_related('user').prefetch_related('replies__user')
         context['comment_form'] = CommentForm()
-        context['prev_chapter'] = Chapter.objects.filter(
-            book=chapter.book, number=chapter.number - 1
-        ).first()
-        context['next_chapter'] = Chapter.objects.filter(
-            book=chapter.book, number=chapter.number + 1
-        ).first()
+
+        context['prev_chapter'] = (
+            Chapter.objects
+            .filter(book=chapter.book, number__lt=chapter.number, is_approved=True)
+            .order_by('-number')
+            .first()
+        )
+        context['next_chapter'] = (
+            Chapter.objects
+            .filter(book=chapter.book, number__gt=chapter.number, is_approved=True)
+            .order_by('number')
+            .first()
+        )
 
         if self.request.user.is_authenticated:
             context['liked_music_ids'] = list(
@@ -169,18 +186,23 @@ class PlaylistDetailView(DetailView):
 @login_required
 def add_comment(request):
     if request.method != 'POST':
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+        return HttpResponseNotAllowed(['POST'])
 
     form = CommentForm(request.POST)
     if not form.is_valid():
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
-    comment = form.save(commit=False)
-    comment.user = request.user
-
     book_id = request.POST.get('book_id')
     chapter_id = request.POST.get('chapter_id')
     playlist_id = request.POST.get('playlist_id')
+
+    if not any([book_id, chapter_id, playlist_id]):
+        messages.error(request, 'Comment must be attached to a book, chapter, or playlist.')
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+
+    comment = form.save(commit=False)
+    comment.user = request.user
+
     parent_id = request.POST.get('parent_id')
 
     if book_id:
@@ -198,6 +220,8 @@ def add_comment(request):
 
 @login_required
 def delete_comment(request, comment_id):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
     comment = get_object_or_404(Comment, id=comment_id)
     if comment.user == request.user or request.user.is_staff:
         comment.delete()
@@ -290,16 +314,19 @@ def like_music(request, music_id):
     music = get_object_or_404(MusicRecommendation, id=music_id)
     like, created = Like.objects.get_or_create(user=request.user, music_recommendation=music)
     if created:
-        music.likes_count += 1
+        MusicRecommendation.objects.filter(pk=music_id).update(likes_count=F('likes_count') + 1)
     else:
         like.delete()
-        music.likes_count = max(0, music.likes_count - 1)
-    music.save()
+        MusicRecommendation.objects.filter(pk=music_id).update(
+            likes_count=F('likes_count') - 1
+        )
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
 @login_required
 def delete_music(request, music_id):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
     music = get_object_or_404(MusicRecommendation, id=music_id)
     if music.user == request.user or request.user.is_staff:
         url = music.chapter.get_absolute_url()
@@ -363,11 +390,10 @@ def like_playlist(request, playlist_id):
     playlist = get_object_or_404(Playlist, id=playlist_id)
     like, created = Like.objects.get_or_create(user=request.user, playlist=playlist)
     if created:
-        playlist.likes_count += 1
+        Playlist.objects.filter(pk=playlist_id).update(likes_count=F('likes_count') + 1)
     else:
         like.delete()
-        playlist.likes_count = max(0, playlist.likes_count - 1)
-    playlist.save()
+        Playlist.objects.filter(pk=playlist_id).update(likes_count=F('likes_count') - 1)
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 

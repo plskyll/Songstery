@@ -4,6 +4,9 @@
     </button>
 
     <form class="topbar__search" action="{% url 'core:home' %}" method="get">
+        {% if active_genre %}
+            <input type="hidden" name="genre" value="{{ active_genre }}">
+        {% endif %}
         <i data-lucide="search" size="16"></i>
         <input type="text" name="search" placeholder="Search books or authors…"
                value="{{ search_query|default:'' }}">
