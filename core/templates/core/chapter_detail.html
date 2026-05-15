@@ -26,9 +26,9 @@
             {% endif %}
             {% if chapter.mood_tags %}
                 <span class="chapter-header__mood">
-        <i data-lucide="music" style="width:12px;height:12px;"></i>
-        {{ chapter.mood_tags }}
-      </span>
+                    <i data-lucide="music" style="width:12px;height:12px;"></i>
+                    {{ chapter.mood_tags }}
+                </span>
             {% endif %}
         </div>
 
@@ -66,18 +66,22 @@
         </div>
 
         {% for music in music_recommendations %}
-            <div class="music-card">
-                {% if music.embed_code and music.link_type == 'youtube' %}
-                    <div class="music-card__player">
-                        <iframe src="https://www.youtube.com/embed/{{ music.embed_code }}"
-                                frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen
-                                loading="lazy"></iframe>
-                    </div>
-                {% endif %}
-
+            <div class="music-card" id="track-{{ music.id }}">
                 <div class="music-card__body">
+
+                    <button
+                            class="play-btn"
+                            data-track-id="{{ music.id }}"
+                            data-title="{{ music.track_title }}"
+                            data-artist="{{ music.artist }}"
+                            data-link-type="{{ music.link_type }}"
+                            data-embed-code="{{ music.embed_code }}"
+                            data-link-url="{{ music.link_url }}"
+                            aria-label="Play {{ music.track_title }}"
+                    >
+                        <i data-lucide="play" style="width:16px;height:16px;"></i>
+                    </button>
+
                     <div class="music-card__info">
                         <div class="music-card__title">{{ music.track_title }}</div>
                         <div class="music-card__artist">{{ music.artist }}</div>
@@ -87,14 +91,14 @@
                         {% endif %}
 
                         <div class="music-card__meta">
-          <span class="music-card__meta-item">
-            <i data-lucide="user" style="width:12px;height:12px;"></i>
-            {{ music.user.username }}
-          </span>
                             <span class="music-card__meta-item">
-            <i data-lucide="calendar" style="width:12px;height:12px;"></i>
-            {{ music.created_at|date:"M j, Y" }}
-          </span>
+                                <i data-lucide="user" style="width:12px;height:12px;"></i>
+                                {{ music.user.username }}
+                            </span>
+                            <span class="music-card__meta-item">
+                                <i data-lucide="calendar" style="width:12px;height:12px;"></i>
+                                {{ music.created_at|date:"M j, Y" }}
+                            </span>
                             <a href="{{ music.link_url }}" target="_blank" rel="noopener"
                                class="music-card__link music-card__meta-item">
                                 <i data-lucide="external-link" style="width:12px;height:12px;"></i>
@@ -111,20 +115,22 @@
                                 {{ music.likes_count }}
                             </a>
                             {% if music.user == user or user.is_staff %}
-                                <a href="{% url 'core:delete_music' music.id %}"
-                                   class="delete-btn"
-                                   onclick="return confirm('Remove this recommendation?')"
-                                   title="Delete">
-                                    <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
-                                </a>
+                                <form method="post" action="{% url 'core:delete_music' music.id %}"
+                                      onsubmit="return confirm('Remove this recommendation?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-btn" title="Delete">
+                                        <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+                                    </button>
+                                </form>
                             {% endif %}
                         {% else %}
                             <span class="like-btn">
-            <i data-lucide="heart" style="width:13px;height:13px;"></i>
-            {{ music.likes_count }}
-          </span>
+                                <i data-lucide="heart" style="width:13px;height:13px;"></i>
+                                {{ music.likes_count }}
+                            </span>
                         {% endif %}
                     </div>
+
                 </div>
             </div>
         {% empty %}
@@ -141,4 +147,30 @@
         {% endfor %}
 
     </div>
+
+    <div id="sticky-player" class="sticky-player player--hidden" role="region" aria-label="Music player">
+        <div class="sticky-player__embed">
+            <iframe
+                    id="player-iframe"
+                    src=""
+                    frameborder="0"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowfullscreen
+            ></iframe>
+        </div>
+        <div class="sticky-player__info">
+            <div class="sticky-player__track">
+                <span id="player-title" class="sticky-player__title"></span>
+                <span id="player-artist" class="sticky-player__artist"></span>
+            </div>
+            <button id="player-close" class="sticky-player__close" aria-label="Close player">
+                <i data-lucide="x" style="width:16px;height:16px;"></i>
+            </button>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'core/js/player.js' %}"></script>
 {% endblock %}
