@@ -1,17 +1,64 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import TemplateView, DetailView
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login
-from django.contrib import messages
-from django.db.models import F, Q
-from django.core.paginator import Paginator
-from django.http import HttpResponseNotAllowed, Http404
+import json
+import urllib.parse
+import urllib.request
 
-from .models import Book, Chapter, MusicRecommendation, Playlist, Like, SavedBook, Comment
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.paginator import Paginator
+from django.db.models import Avg, F, Q
+from django.http import Http404, HttpResponseNotAllowed, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.generic import DetailView, TemplateView
+
 from .forms import (
-    MusicRecommendationForm, PlaylistForm, CommentForm,
-    SignUpForm, UserUpdateForm, BookForm, BulkChaptersForm, PlaylistTrackForm
+    AuthorVerificationForm,
+    BookForm,
+    BookRatingForm,
+    BulkChaptersForm,
+    CommentForm,
+    MusicRecommendationForm,
+    PlaylistForm,
+    PlaylistTrackForm,
+    SignUpForm,
+    UserUpdateForm,
 )
+from .models import (
+    AuthorVerification,
+    Book,
+    BookRating,
+    Chapter,
+    Comment,
+    Follow,
+    Like,
+    MusicRecommendation,
+    Playlist,
+    SavedBook,
+)
+
+_SORT_MAP = {
+    'newest': '-created_at',
+    'popular': '-views_count',
+    'year': '-year',
+    'title': 'title',
+}
+
+_SORT_OPTIONS = [
+    ('newest', 'Newest'),
+    ('popular', 'Most viewed'),
+    ('year', 'By year'),
+    ('title', 'A–Z'),
+]
+
+
+def page_not_found(request, exception):
+    return render(request, '404.html', status=404)
+
+
+def server_error(request):
+    return render(request, '500.html', status=500)
 
 
 def signup(request):
@@ -35,6 +82,7 @@ class HomeView(TemplateView):
 
         search_query = self.request.GET.get('search', '').strip()
         active_genre = self.request.GET.get('genre', '').strip()
+        current_sort = self.request.GET.get('sort', 'newest')
 
         books_qs = Book.objects.all()
 
@@ -47,6 +95,8 @@ class HomeView(TemplateView):
 
         if active_genre:
             books_qs = books_qs.filter(genre__iexact=active_genre)
+
+        books_qs = books_qs.order_by(_SORT_MAP.get(current_sort, '-created_at'))
 
         if search_query:
             section_title = f'Search results: "{search_query}"'
@@ -63,6 +113,8 @@ class HomeView(TemplateView):
             'page_obj': page_obj,
             'search_query': search_query,
             'active_genre': active_genre,
+            'current_sort': current_sort,
+            'sort_options': _SORT_OPTIONS,
             'books_section_title': section_title,
             'genres': (
                 Book.objects
@@ -107,11 +159,19 @@ class BookDetailView(DetailView):
                 parent=None
             ).select_related('user').prefetch_related('replies__user'),
             'comment_form': CommentForm(),
+            'book_id': book.pk,
+            'rating_form': BookRatingForm(),
         })
 
         if user.is_authenticated:
             context['is_saved'] = SavedBook.objects.filter(user=user, book=book).exists()
             context['is_owner'] = is_privileged
+            context['user_rating'] = BookRating.objects.filter(
+                user=user, book=book
+            ).values_list('score', flat=True).first()
+            context['can_apply_author'] = not AuthorVerification.objects.filter(
+                user=user, book=book
+            ).exists()
 
         return context
 
@@ -143,24 +203,32 @@ class ChapterDetailView(DetailView):
         if not is_privileged:
             chapter_qs = chapter_qs.filter(is_approved=True)
 
+        verified_author = chapter.book.verified_author
+        music_qs = chapter.music_recommendations.select_related('user')
+
+        if verified_author:
+            author_music = [m for m in music_qs if m.user_id == verified_author.pk]
+            other_music = [m for m in music_qs if m.user_id != verified_author.pk]
+        else:
+            author_music = []
+            other_music = list(music_qs)
+
         context.update({
-            'music_recommendations': chapter.music_recommendations.select_related('user'),
+            'music_recommendations': music_qs,
+            'author_music': author_music,
+            'other_music': other_music,
+            'verified_author': verified_author,
             'playlists': chapter.playlists.filter(is_public=True),
             'comments': chapter.comments.filter(
                 parent=None
             ).select_related('user').prefetch_related('replies__user'),
             'comment_form': CommentForm(),
+            'chapter_id': chapter.pk,
             'prev_chapter': (
-                chapter_qs
-                .filter(number__lt=chapter.number)
-                .order_by('-number')
-                .first()
+                chapter_qs.filter(number__lt=chapter.number).order_by('-number').first()
             ),
             'next_chapter': (
-                chapter_qs
-                .filter(number__gt=chapter.number)
-                .order_by('number')
-                .first()
+                chapter_qs.filter(number__gt=chapter.number).order_by('number').first()
             ),
         })
 
@@ -168,7 +236,7 @@ class ChapterDetailView(DetailView):
             context['liked_music_ids'] = set(
                 Like.objects.filter(
                     user=user,
-                    music_recommendation__in=context['music_recommendations'],
+                    music_recommendation__in=music_qs,
                 ).values_list('music_recommendation_id', flat=True)
             )
 
@@ -182,16 +250,138 @@ class PlaylistDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['tracks'] = self.object.tracks.all()
-        context['comments'] = self.object.comments.filter(
-            parent=None
-        ).select_related('user').prefetch_related('replies__user')
-        context['comment_form'] = CommentForm()
+        context.update({
+            'tracks': self.object.tracks.all(),
+            'comments': self.object.comments.filter(
+                parent=None
+            ).select_related('user').prefetch_related('replies__user'),
+            'comment_form': CommentForm(),
+            'playlist_id': self.object.pk,
+        })
         if self.request.user.is_authenticated:
             context['is_liked'] = Like.objects.filter(
                 user=self.request.user, playlist=self.object
             ).exists()
         return context
+
+
+def author_profile(request, user_id):
+    author_user = get_object_or_404(User, id=user_id)
+    if not hasattr(author_user, 'profile') or not author_user.profile.is_verified_author:
+        raise Http404
+
+    authored_books = Book.objects.filter(verified_author=author_user)
+
+    is_following = False
+    followers_count = author_user.followers.count()
+    if request.user.is_authenticated:
+        is_following = Follow.objects.filter(
+            follower=request.user, following=author_user
+        ).exists()
+
+    return render(request, 'core/author_profile.html', {
+        'author': author_user,
+        'authored_books': authored_books,
+        'is_following': is_following,
+        'followers_count': followers_count,
+    })
+
+
+@login_required
+def apply_author_verification(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+
+    existing = AuthorVerification.objects.filter(user=request.user, book=book).first()
+    if existing:
+        messages.info(request, f'Your application is already {existing.get_status_display().lower()}.')
+        return redirect('core:book_detail', pk=book_id)
+
+    if request.method == 'POST':
+        form = AuthorVerificationForm(request.POST, request.FILES)
+        if form.is_valid():
+            verification = form.save(commit=False)
+            verification.user = request.user
+            verification.book = book
+            verification.save()
+            messages.success(
+                request,
+                'Application submitted. We will review it within 3–5 business days.',
+            )
+            return redirect('core:book_detail', pk=book_id)
+    else:
+        form = AuthorVerificationForm()
+
+    return render(request, 'core/apply_author.html', {'form': form, 'book': book})
+
+
+@login_required
+def follow_user(request, user_id):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    target = get_object_or_404(User, id=user_id)
+    if target == request.user:
+        return redirect('core:author_profile', user_id=user_id)
+    follow, created = Follow.objects.get_or_create(follower=request.user, following=target)
+    if not created:
+        follow.delete()
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+@login_required
+def rate_book(request, book_id):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    book = get_object_or_404(Book, id=book_id)
+    try:
+        score = int(request.POST.get('score', 0))
+    except (TypeError, ValueError):
+        score = 0
+    if not 1 <= score <= 5:
+        messages.error(request, 'Rating must be between 1 and 5.')
+        return redirect('core:book_detail', pk=book_id)
+    BookRating.objects.update_or_create(
+        user=request.user,
+        book=book,
+        defaults={'score': score},
+    )
+    return redirect('core:book_detail', pk=book_id)
+
+
+def youtube_search(request):
+    query = request.GET.get('q', '').strip()
+    if len(query) < 3:
+        return JsonResponse({'results': []})
+
+    api_key = getattr(settings, 'YOUTUBE_API_KEY', '')
+    if not api_key:
+        return JsonResponse({'error': 'YouTube API key not configured'}, status=503)
+
+    params = urllib.parse.urlencode({
+        'part': 'snippet',
+        'type': 'video',
+        'maxResults': 5,
+        'q': query,
+        'key': api_key,
+    })
+    url = f'https://www.googleapis.com/youtube/v3/search?{params}'
+
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            data = json.loads(resp.read())
+    except Exception:
+        return JsonResponse({'error': 'Search failed'}, status=502)
+
+    results = [
+        {
+            'id': item['id']['videoId'],
+            'title': item['snippet']['title'],
+            'channel': item['snippet']['channelTitle'],
+            'thumbnail': item['snippet']['thumbnails']['default']['url'],
+        }
+        for item in data.get('items', [])
+        if item.get('id', {}).get('videoId')
+    ]
+    return JsonResponse({'results': results})
 
 
 @login_required
@@ -214,14 +404,14 @@ def add_comment(request):
     comment = form.save(commit=False)
     comment.user = request.user
 
-    parent_id = request.POST.get('parent_id')
-
     if book_id:
         comment.book = get_object_or_404(Book, id=book_id)
     if chapter_id:
         comment.chapter = get_object_or_404(Chapter, id=chapter_id)
     if playlist_id:
         comment.playlist = get_object_or_404(Playlist, id=playlist_id)
+
+    parent_id = request.POST.get('parent_id')
     if parent_id:
         comment.parent = get_object_or_404(Comment, id=parent_id)
 
@@ -322,13 +512,20 @@ def add_music_recommendation(request, chapter_id):
 def like_music(request, music_id):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
+
     music = get_object_or_404(MusicRecommendation, id=music_id)
     like, created = Like.objects.get_or_create(user=request.user, music_recommendation=music)
+
     if created:
         MusicRecommendation.objects.filter(pk=music_id).update(likes_count=F('likes_count') + 1)
     else:
         like.delete()
         MusicRecommendation.objects.filter(pk=music_id).update(likes_count=F('likes_count') - 1)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        music.refresh_from_db(fields=['likes_count'])
+        return JsonResponse({'likes_count': music.likes_count, 'liked': created})
+
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ author.get_full_name|default:author.username }} — {{ SITE_NAME }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/components/phase2.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="author-profile">
+
+        <nav class="breadcrumbs">
+            <a href="{% url 'core:home' %}">Discover</a>
+            <span class="breadcrumbs__sep">/</span>
+            <span>{{ author.get_full_name|default:author.username }}</span>
+        </nav>
+
+        <div class="author-hero">
+            <div class="author-hero__avatar">
+                {{ author.username|first|upper }}
+            </div>
+            <div>
+                <h1 class="author-hero__name">
+                    {{ author.get_full_name|default:author.username }}
+                    <span class="verified-badge">
+                        <i data-lucide="badge-check"></i>
+                        Verified Author
+                    </span>
+                </h1>
+
+                <div class="author-hero__meta">
+                    <span>{{ followers_count }} follower{{ followers_count|pluralize }}</span>
+                    <span>{{ authored_books.count }} book{{ authored_books.count|pluralize }}</span>
+                </div>
+
+                {% if author.profile.bio %}
+                    <p class="author-hero__bio">{{ author.profile.bio }}</p>
+                {% endif %}
+
+                {% if user.is_authenticated and user != author %}
+                    <form method="post" action="{% url 'core:follow_user' author.id %}"
+                          style="margin-top:14px;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm {% if is_following %}btn-ghost{% else %}btn-accent{% endif %}">
+                            {% if is_following %}
+                                <i data-lucide="user-minus" style="width:13px;height:13px;"></i>
+                                Unfollow
+                            {% else %}
+                                <i data-lucide="user-plus" style="width:13px;height:13px;"></i>
+                                Follow
+                            {% endif %}
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <h2 class="section-head__title mb-16">Books by this author</h2>
+        <div class="books-grid">
+            {% for book in authored_books %}
+                {% include 'includes/_book_card.html' with book=book %}
+            {% empty %}
+                <p class="text-muted text-sm">No books yet.</p>
+            {% endfor %}
+        </div>
+
+    </div>
+{% endblock %}

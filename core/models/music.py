@@ -1,12 +1,7 @@
-import re
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
 from .book import Book, Chapter
-
-_YOUTUBE_RE = re.compile(r'(?:v=|youtu\.be/|embed/)([A-Za-z0-9_-]{11})')
-_MUSIC_YT_RE = re.compile(r'music\.youtube\.com')
-_SPOTIFY_RE = re.compile(r'spotify\.com/track/([A-Za-z0-9]+)')
 
 
 class MusicRecommendation(models.Model):
@@ -14,56 +9,58 @@ class MusicRecommendation(models.Model):
         ('youtube', 'YouTube'),
         ('spotify', 'Spotify'),
         ('soundcloud', 'SoundCloud'),
-        ('other', 'Інше'),
+        ('other', 'Other'),
+    ]
+
+    MOOD_CHOICES = [
+        ('epic', 'Epic'),
+        ('sad', 'Melancholic'),
+        ('calm', 'Calm'),
+        ('tense', 'Tense'),
+        ('romantic', 'Romantic'),
+        ('dark', 'Dark'),
+        ('uplifting', 'Uplifting'),
+        ('mysterious', 'Mysterious'),
     ]
 
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE, related_name='music_recommendations')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    track_title = models.CharField(max_length=255, verbose_name="Назва треку")
-    artist = models.CharField(max_length=255, verbose_name="Виконавець")
+    track_title = models.CharField(max_length=255)
+    artist = models.CharField(max_length=255)
     link_type = models.CharField(max_length=20, choices=LINK_TYPES, default='youtube')
-    link_url = models.URLField(verbose_name="Посилання")
+    link_url = models.URLField()
     embed_code = models.CharField(max_length=100, blank=True)
-    comment = models.TextField(blank=True, verbose_name="Коментар")
+    comment = models.TextField(blank=True)
+    mood = models.CharField(max_length=20, choices=MOOD_CHOICES, blank=True)
     likes_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Музична рекомендація"
-        verbose_name_plural = "Музичні рекомендації"
+        verbose_name = 'Music recommendation'
+        verbose_name_plural = 'Music recommendations'
         ordering = ['-likes_count', '-created_at']
 
-    def save(self, *args, **kwargs):
-        if self.link_type == 'youtube' and _MUSIC_YT_RE.search(self.link_url):
-            self.link_url = self.link_url.replace('music.youtube.com', 'www.youtube.com')
-        if not self.embed_code:
-            if self.link_type == 'youtube':
-                match = _YOUTUBE_RE.search(self.link_url)
-                self.embed_code = match.group(1) if match else ''
-            elif self.link_type == 'spotify':
-                match = _SPOTIFY_RE.search(self.link_url)
-                self.embed_code = match.group(1) if match else ''
-        super().save(*args, **kwargs)
-
     def __str__(self):
-        return f"{self.track_title} — {self.artist}"
+        return f'{self.track_title} — {self.artist}'
 
 
 class Playlist(models.Model):
-    title = models.CharField(max_length=255, verbose_name="Назва")
-    description = models.TextField(blank=True, verbose_name="Опис")
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='playlists')
-    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE, null=True, blank=True, related_name='playlists')
+    chapter = models.ForeignKey(
+        Chapter, on_delete=models.CASCADE, null=True, blank=True, related_name='playlists'
+    )
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     mood = models.CharField(max_length=200, blank=True)
-    external_link = models.URLField(blank=True, verbose_name="Посилання на плейлист (YouTube/Spotify)")
+    external_link = models.URLField(blank=True)
     likes_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     is_public = models.BooleanField(default=True)
 
     class Meta:
-        verbose_name = "Плейлист"
-        verbose_name_plural = "Плейлисти"
+        verbose_name = 'Playlist'
+        verbose_name_plural = 'Playlists'
         ordering = ['-created_at']
 
     def __str__(self):
@@ -85,4 +82,4 @@ class PlaylistTrack(models.Model):
         ordering = ['order']
 
     def __str__(self):
-        return f"{self.track_title} — {self.artist} (#{self.order})"
+        return f'{self.track_title} — {self.artist}'

@@ -8,6 +8,7 @@ urlpatterns = [
 
     path('book/<int:pk>/', views.BookDetailView.as_view(), name='book_detail'),
     path('book/<int:book_id>/save/', views.save_book, name='save_book'),
+    path('book/<int:book_id>/rate/', views.rate_book, name='rate_book'),
     path('book/create/', views.create_book, name='create_book'),
 
     path('book/<int:book_id>/chapter/<int:chapter_num>/', views.ChapterDetailView.as_view(), name='chapter_detail'),
@@ -23,6 +24,13 @@ urlpatterns = [
 
     path('comments/add/', views.add_comment, name='add_comment'),
     path('comments/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
+
+    path('author/apply/<int:book_id>/', views.apply_author_verification, name='apply_author'),
+    path('author/<int:user_id>/', views.author_profile, name='author_profile'),
+
+    path('user/<int:user_id>/follow/', views.follow_user, name='follow_user'),
+
+    path('youtube-search/', views.youtube_search, name='youtube_search'),
 
     path('profile/', views.profile, name='profile'),
 ]

@@ -5,6 +5,8 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/pages/book.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components/comments.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components/phase2.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -36,21 +38,41 @@
                 {% endif %}
 
                 <h1 class="book-hero__title">{{ book.title }}</h1>
-                <p class="book-hero__author">{{ book.author }}</p>
+
+                <p class="book-hero__author">
+                    {% if book.verified_author %}
+                        <a href="{% url 'core:author_profile' book.verified_author.id %}" class="author-link">
+                            {{ book.author }}
+                            <span class="verified-badge">
+                                <i data-lucide="badge-check"></i>
+                                Verified Author
+                            </span>
+                        </a>
+                    {% else %}
+                        {{ book.author }}
+                    {% endif %}
+                </p>
 
                 <div class="book-hero__meta">
-        <span class="book-hero__meta-item">
-          <i data-lucide="calendar" style="width:13px;height:13px;"></i>
-          {{ book.year }}
-        </span>
                     <span class="book-hero__meta-item">
-          <i data-lucide="eye" style="width:13px;height:13px;"></i>
-          {{ book.views_count }} views
-        </span>
+                        <i data-lucide="calendar" style="width:13px;height:13px;"></i>
+                        {{ book.year }}
+                    </span>
                     <span class="book-hero__meta-item">
-          <i data-lucide="book-open" style="width:13px;height:13px;"></i>
-          {{ chapters|length }} chapter{{ chapters|length|pluralize }}
-        </span>
+                        <i data-lucide="eye" style="width:13px;height:13px;"></i>
+                        {{ book.views_count }} views
+                    </span>
+                    <span class="book-hero__meta-item">
+                        <i data-lucide="book-open" style="width:13px;height:13px;"></i>
+                        {{ chapters|length }} chapter{{ chapters|length|pluralize }}
+                    </span>
+                    {% if book.average_rating %}
+                        <span class="book-hero__meta-item rating-display">
+                            <i data-lucide="star" style="width:13px;height:13px;color:#E8A020;"></i>
+                            <span class="rating-display__score">{{ book.average_rating }}</span>
+                            <span class="rating-display__count">({{ book.ratings.count }})</span>
+                        </span>
+                    {% endif %}
                 </div>
 
                 {% if book.description %}
@@ -72,10 +94,35 @@
                         <a href="{% url 'core:add_chapters' book.id %}" class="btn btn-ghost btn-sm">
                             <i data-lucide="plus" style="width:14px;height:14px;"></i> Add Chapters
                         </a>
+                        {% if can_apply_author %}
+                            <a href="{% url 'core:apply_author' book.id %}" class="btn btn-ghost btn-sm">
+                                <i data-lucide="badge-check" style="width:14px;height:14px;"></i> I'm the author
+                            </a>
+                        {% endif %}
                     {% else %}
                         <a href="{% url 'login' %}" class="btn btn-accent btn-sm">Sign in to interact</a>
                     {% endif %}
                 </div>
+
+                {% if user.is_authenticated %}
+                    <form id="star-rating" method="post" action="{% url 'core:rate_book' book.id %}"
+                          style="margin-top:16px;display:flex;align-items:center;gap:10px;">
+                        {% csrf_token %}
+                        {{ rating_form.score }}
+                        <div class="star-rating">
+                            {% for i in "12345" %}
+                                <button type="submit" class="star-btn {% if user_rating >= forloop.counter %}star-btn--active{% endif %}"
+                                        data-value="{{ forloop.counter }}"
+                                        aria-label="Rate {{ forloop.counter }} star{{ forloop.counter|pluralize }}">
+                                    <i data-lucide="star" style="width:20px;height:20px;"></i>
+                                </button>
+                            {% endfor %}
+                        </div>
+                        <span class="text-xs text-muted">
+                            {% if user_rating %}Your rating: {{ user_rating }}/5{% else %}Rate this book{% endif %}
+                        </span>
+                    </form>
+                {% endif %}
             </div>
         </div>
 
@@ -95,7 +142,7 @@
                                     <div class="chapter-card__title">
                                         {{ chapter.title }}
                                         {% if not chapter.is_approved %}
-                                            <span class="tag tag--danger" style="font-size:10px; margin-left:6px;">Pending</span>
+                                            <span class="tag tag--danger" style="font-size:10px;margin-left:6px;">Pending</span>
                                         {% endif %}
                                     </div>
                                     {% if chapter.mood_tags %}
@@ -108,8 +155,7 @@
                                     <i data-lucide="music" style="width:13px;height:13px;"></i>
                                     {{ chapter.music_recommendations.count }}
                                 </div>
-                                <i data-lucide="chevron-right"
-                                   style="width:15px;height:15px;color:var(--clr-border);flex-shrink:0;"></i>
+                                <i data-lucide="chevron-right" style="width:15px;height:15px;color:var(--clr-border);flex-shrink:0;"></i>
                             </a>
                         {% endfor %}
                     </div>
@@ -139,14 +185,16 @@
                                 <div class="playlist-card__meta">
                                     <span>{{ playlist.creator.username }}</span>
                                     <span class="flex-center gap-8">
-              <i data-lucide="heart" style="width:12px;height:12px;"></i>
-              {{ playlist.likes_count }}
-            </span>
+                                        <i data-lucide="heart" style="width:12px;height:12px;"></i>
+                                        {{ playlist.likes_count }}
+                                    </span>
                                 </div>
                             </a>
                         {% endfor %}
                     </div>
                 {% endif %}
+
+                {% include 'includes/_comments.html' with comments=comments comment_form=comment_form book_id=book.id %}
             </div>
 
             {% if top_music %}
@@ -164,8 +212,9 @@
                                     </div>
                                     <div class="top-music-item__body">
                                         <div class="top-music-item__title">{{ music.track_title }}</div>
-                                        <div class="top-music-item__sub">{{ music.artist }} ·
-                                            Ch.{{ music.chapter.number }}</div>
+                                        <div class="top-music-item__sub">
+                                            {{ music.artist }} · Ch.{{ music.chapter.number }}
+                                        </div>
                                     </div>
                                     <a href="{{ music.link_url }}" target="_blank" rel="noopener"
                                        class="top-music-item__listen">Play</a>
@@ -178,4 +227,8 @@
         </div>
 
     </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'core/js/rating.js' %}"></script>
 {% endblock %}

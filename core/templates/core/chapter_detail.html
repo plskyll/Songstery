@@ -5,6 +5,8 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/pages/chapter.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components/comments.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components/phase2.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -65,113 +67,64 @@
             {% endif %}
         </div>
 
-        {% for music in music_recommendations %}
-            <div class="music-card" id="track-{{ music.id }}">
-                <div class="music-card__body">
-
-                    <button
-                            class="play-btn"
-                            data-track-id="{{ music.id }}"
-                            data-title="{{ music.track_title }}"
-                            data-artist="{{ music.artist }}"
-                            data-link-type="{{ music.link_type }}"
-                            data-embed-code="{{ music.embed_code }}"
-                            data-link-url="{{ music.link_url }}"
-                            aria-label="Play {{ music.track_title }}"
-                    >
-                        <i data-lucide="play" style="width:16px;height:16px;"></i>
-                    </button>
-
-                    <div class="music-card__info">
-                        <div class="music-card__title">{{ music.track_title }}</div>
-                        <div class="music-card__artist">{{ music.artist }}</div>
-
-                        {% if music.comment %}
-                            <div class="music-card__comment">{{ music.comment }}</div>
-                        {% endif %}
-
-                        <div class="music-card__meta">
-                            <span class="music-card__meta-item">
-                                <i data-lucide="user" style="width:12px;height:12px;"></i>
-                                {{ music.user.username }}
-                            </span>
-                            <span class="music-card__meta-item">
-                                <i data-lucide="calendar" style="width:12px;height:12px;"></i>
-                                {{ music.created_at|date:"M j, Y" }}
-                            </span>
-                            <a href="{{ music.link_url }}" target="_blank" rel="noopener"
-                               class="music-card__link music-card__meta-item">
-                                <i data-lucide="external-link" style="width:12px;height:12px;"></i>
-                                Open in {{ music.get_link_type_display }}
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="music-card__actions">
-                        {% if user.is_authenticated %}
-                            <a href="{% url 'core:like_music' music.id %}"
-                               class="like-btn {% if music.id in liked_music_ids %}liked{% endif %}">
-                                <i data-lucide="heart" style="width:13px;height:13px;"></i>
-                                {{ music.likes_count }}
-                            </a>
-                            {% if music.user == user or user.is_staff %}
-                                <form method="post" action="{% url 'core:delete_music' music.id %}"
-                                      onsubmit="return confirm('Remove this recommendation?')">
-                                    {% csrf_token %}
-                                    <button type="submit" class="delete-btn" title="Delete">
-                                        <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
-                                    </button>
-                                </form>
-                            {% endif %}
-                        {% else %}
-                            <span class="like-btn">
-                                <i data-lucide="heart" style="width:13px;height:13px;"></i>
-                                {{ music.likes_count }}
-                            </span>
-                        {% endif %}
-                    </div>
-
+        {% if author_music %}
+            <div class="author-picks mb-24">
+                <div class="author-picks__header">
+                    <i data-lucide="badge-check" style="width:15px;height:15px;color:var(--clr-accent);"></i>
+                    <span>Author's picks</span>
+                    <a href="{% url 'core:author_profile' verified_author.id %}">
+                        {{ verified_author.get_full_name|default:verified_author.username }}
+                    </a>
                 </div>
+                {% for music in author_music %}
+                    {% include 'includes/_music_card.html' with music=music %}
+                {% endfor %}
             </div>
+            {% if other_music %}
+                <hr class="section-divider">
+            {% endif %}
+        {% endif %}
+
+        {% for music in other_music %}
+            {% include 'includes/_music_card.html' with music=music %}
         {% empty %}
-            <div class="empty-state">
-                <div class="empty-state__icon">
-                    <i data-lucide="music" style="width:22px;height:22px;"></i>
+            {% if not author_music %}
+                <div class="empty-state">
+                    <div class="empty-state__icon">
+                        <i data-lucide="music" style="width:22px;height:22px;"></i>
+                    </div>
+                    <div class="empty-state__title">No music yet</div>
+                    <p class="empty-state__text">Be the first to add a track that matches this chapter's atmosphere.</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'core:add_music' chapter.id %}" class="btn btn-accent">Add Music</a>
+                    {% endif %}
                 </div>
-                <div class="empty-state__title">No music yet</div>
-                <p class="empty-state__text">Be the first to add a track that matches this chapter's atmosphere.</p>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'core:add_music' chapter.id %}" class="btn btn-accent">Add Music</a>
-                {% endif %}
-            </div>
+            {% endif %}
         {% endfor %}
+
+        {% include 'includes/_comments.html' with comments=comments comment_form=comment_form chapter_id=chapter.id %}
 
     </div>
 
     <div id="sticky-player" class="sticky-player player--hidden" role="region" aria-label="Music player">
-
-        <div class="player__bar">
-            <span id="player-dot" class="player__dot"></span>
-            <div class="player__meta">
-                <span id="player-title" class="player__title"></span>
-                <span id="player-artist" class="player__artist"></span>
+        <div class="sticky-player__embed">
+            <iframe id="player-iframe" src="" frameborder="0"
+                    allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="sticky-player__info">
+            <div class="sticky-player__track">
+                <span id="player-title" class="sticky-player__title"></span>
+                <span id="player-artist" class="sticky-player__artist"></span>
             </div>
-            <span id="player-platform" class="player__platform"></span>
-            <a id="player-open" href="#" target="_blank" rel="noopener" class="player__open">
-                <i data-lucide="external-link" style="width:11px;height:11px;"></i>
-                Відкрити
-            </a>
-            <button id="player-close" class="player__close" aria-label="Close player">
-                <i data-lucide="x" style="width:14px;height:14px;"></i>
+            <button id="player-close" class="sticky-player__close" aria-label="Close player">
+                <i data-lucide="x" style="width:16px;height:16px;"></i>
             </button>
         </div>
-
-        <div id="player-embed-area" class="player__embed"></div>
-
     </div>
 
 {% endblock %}
 
 {% block extra_js %}
     <script src="{% static 'core/js/player.js' %}"></script>
+    <script src="{% static 'core/js/likes.js' %}"></script>
 {% endblock %}

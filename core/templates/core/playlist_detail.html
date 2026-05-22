@@ -6,6 +6,7 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/pages/playlist.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components/comments.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -33,14 +34,14 @@
                 {% endif %}
 
                 <div class="playlist-hero__meta">
-        <span class="playlist-hero__meta-item">
-          <i data-lucide="heart" style="width:13px;height:13px;"></i>
-          {{ playlist.likes_count }} likes
-        </span>
                     <span class="playlist-hero__meta-item">
-          <i data-lucide="calendar" style="width:13px;height:13px;"></i>
-          {{ playlist.created_at|date:"M j, Y" }}
-        </span>
+                        <i data-lucide="heart" style="width:13px;height:13px;"></i>
+                        {{ playlist.likes_count }} likes
+                    </span>
+                    <span class="playlist-hero__meta-item">
+                        <i data-lucide="calendar" style="width:13px;height:13px;"></i>
+                        {{ playlist.created_at|date:"M j, Y" }}
+                    </span>
                     {% if playlist.mood %}
                         <span class="tag tag--accent">{{ playlist.mood }}</span>
                     {% endif %}
@@ -48,11 +49,14 @@
 
                 <div class="playlist-hero__actions">
                     {% if user.is_authenticated %}
-                        <a href="{% url 'core:like_playlist' playlist.id %}"
-                           class="like-btn {% if is_liked %}liked{% endif %}">
-                            <i data-lucide="heart" style="width:13px;height:13px;"></i>
-                            {% if is_liked %}Liked{% else %}Like{% endif %}
-                        </a>
+                        <form method="post" action="{% url 'core:like_playlist' playlist.id %}"
+                              style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="like-btn {% if is_liked %}liked{% endif %}">
+                                <i data-lucide="heart" style="width:13px;height:13px;"></i>
+                                {% if is_liked %}Liked{% else %}Like{% endif %}
+                            </button>
+                        </form>
                     {% endif %}
                     {% if playlist.external_link %}
                         <a href="{{ playlist.external_link }}" target="_blank" rel="noopener"
@@ -101,6 +105,8 @@
                 </div>
             {% endif %}
         </div>
+
+        {% include 'includes/_comments.html' with comments=comments comment_form=comment_form playlist_id=playlist.id %}
 
     </div>
 {% endblock %}

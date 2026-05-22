@@ -56,22 +56,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'songstery.wsgi.application'
 
-# ---------------------------------------------------------------------------
-# Database
-# Defaults to SQLite for local dev. Set DATABASE_URL in .env for MySQL/Postgres.
-#
-# MySQL example:
-#   DATABASE_URL=mysql://user:password@localhost:3306/songstory
-#
-# Requires mysqlclient:
-#   pip install mysqlclient==2.2.4
-# ---------------------------------------------------------------------------
 _db_default = f'sqlite:///{BASE_DIR / "db.sqlite3"}'
 DATABASES = {
     'default': env.db('DATABASE_URL', default=_db_default)
 }
 
-# MySQL-specific options injected when the engine is MySQL
 if DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
     DATABASES['default'].setdefault('OPTIONS', {})
     DATABASES['default']['OPTIONS']['charset'] = 'utf8mb4'
@@ -104,3 +93,5 @@ LOGOUT_REDIRECT_URL = 'core:home'
 LOGIN_URL = 'login'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+YOUTUBE_API_KEY = env('YOUTUBE_API_KEY', default='')

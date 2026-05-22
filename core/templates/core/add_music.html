@@ -3,6 +3,10 @@
 
 {% block title %}Add Music — {{ SITE_NAME }}{% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/components/phase2.css' %}">
+{% endblock %}
+
 {% block content %}
     <div class="form-wrap">
         <nav class="breadcrumbs">
@@ -16,29 +20,70 @@
         </nav>
 
         <div class="form-box">
-            <div class="form-box__title">Add a music recommendation</div>
-            <p class="form-box__subtitle">For "{{ chapter.title }}" in {{ chapter.book.title }}</p>
+            <div class="form-box__title">Add a recommendation</div>
+            <p class="form-box__subtitle">For "{{ chapter.title }}" — {{ chapter.book.title }}</p>
 
             <form method="post">
                 {% csrf_token %}
-                {% for field in form %}
-                    <div class="form-group">
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.errors %}
-                            <span class="form-error">{{ field.errors.0 }}</span>
-                        {% endif %}
-                        {% if field.help_text %}
-                            <small>{{ field.help_text }}</small>
-                        {% endif %}
-                    </div>
-                {% endfor %}
+
+                <div class="form-group yt-search-wrap">
+                    <label for="{{ form.track_title.id_for_label }}">Track title</label>
+                    {{ form.track_title }}
+                    <div id="youtube-results"></div>
+                    {% if form.track_title.errors %}
+                        <span class="form-error">{{ form.track_title.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.artist.id_for_label }}">Artist</label>
+                    {{ form.artist }}
+                    {% if form.artist.errors %}
+                        <span class="form-error">{{ form.artist.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.link_type.id_for_label }}">Platform</label>
+                    {{ form.link_type }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.link_url.id_for_label }}">Link</label>
+                    {{ form.link_url }}
+                    {% if form.link_url.errors %}
+                        <span class="form-error">{{ form.link_url.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.embed_code.id_for_label }}">
+                        Embed / video ID
+                        <small style="font-weight:400;color:var(--clr-muted);">(auto-filled from search)</small>
+                    </label>
+                    {{ form.embed_code }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.mood.id_for_label }}">Mood</label>
+                    {{ form.mood }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.comment.id_for_label }}">Why this track fits</label>
+                    {{ form.comment }}
+                </div>
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-accent">Add Recommendation</button>
-                    <a href="{% url 'core:chapter_detail' chapter.book.id chapter.number %}" class="btn btn-ghost">Cancel</a>
+                    <a href="{% url 'core:chapter_detail' chapter.book.id chapter.number %}"
+                       class="btn btn-ghost">Cancel</a>
                 </div>
             </form>
         </div>
     </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'core/js/youtube_search.js' %}"></script>
 {% endblock %}

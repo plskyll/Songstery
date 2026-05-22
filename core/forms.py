@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import MusicRecommendation, Playlist, Comment, Book, PlaylistTrack
+from .models import MusicRecommendation, Playlist, Comment, Book, PlaylistTrack, AuthorVerification, BookRating
 
 
 class StyledFormMixin:
@@ -10,9 +10,11 @@ class StyledFormMixin:
         for field_name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs['class'] = 'form-checkbox'
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs['class'] = 'form-select'
             else:
-                existing_class = field.widget.attrs.get('class', '')
-                field.widget.attrs['class'] = f'{existing_class} form-input'.strip()
+                existing = field.widget.attrs.get('class', '')
+                field.widget.attrs['class'] = f'{existing} form-input'.strip()
 
 
 class BookForm(StyledFormMixin, forms.ModelForm):
@@ -20,11 +22,7 @@ class BookForm(StyledFormMixin, forms.ModelForm):
         model = Book
         fields = ['title', 'author', 'year', 'genre', 'description', 'cover_image', 'cover_url']
         widgets = {
-            'description': forms.Textarea(attrs={
-                'rows': 4,
-                'class': 'form-textarea',
-                'placeholder': 'About this book',
-            }),
+            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-textarea'}),
             'cover_url': forms.URLInput(attrs={'placeholder': 'https://...'}),
         }
 
@@ -32,13 +30,11 @@ class BookForm(StyledFormMixin, forms.ModelForm):
 class SignUpForm(StyledFormMixin, UserCreationForm):
     email = forms.EmailField(
         required=True,
-        label='Email',
         widget=forms.EmailInput(attrs={'placeholder': 'example@mail.com'}),
     )
     phone = forms.CharField(
         required=False,
         max_length=20,
-        label='Phone',
         widget=forms.TextInput(attrs={'placeholder': '+380...'}),
     )
 
@@ -67,14 +63,9 @@ class UserUpdateForm(StyledFormMixin, forms.ModelForm):
 class MusicRecommendationForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = MusicRecommendation
-        fields = ['track_title', 'artist', 'link_type', 'link_url', 'embed_code', 'comment']
+        fields = ['track_title', 'artist', 'link_type', 'link_url', 'embed_code', 'comment', 'mood']
         widgets = {
-            'comment': forms.Textarea(attrs={
-                'rows': 3,
-                'class': 'form-textarea',
-                'placeholder': 'Why this track fits this chapter',
-            }),
-            'link_type': forms.Select(attrs={'class': 'form-select'}),
+            'comment': forms.Textarea(attrs={'rows': 3, 'class': 'form-textarea'}),
         }
 
 
@@ -83,11 +74,7 @@ class PlaylistForm(StyledFormMixin, forms.ModelForm):
         model = Playlist
         fields = ['title', 'description', 'mood', 'external_link', 'is_public']
         widgets = {
-            'description': forms.Textarea(attrs={
-                'rows': 3,
-                'class': 'form-textarea',
-                'placeholder': 'Playlist description',
-            }),
+            'description': forms.Textarea(attrs={'rows': 3, 'class': 'form-textarea'}),
         }
 
 
@@ -95,11 +82,6 @@ class PlaylistTrackForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = PlaylistTrack
         fields = ['track_title', 'artist', 'link_url']
-        widgets = {
-            'track_title': forms.TextInput(attrs={'placeholder': 'Track name'}),
-            'artist': forms.TextInput(attrs={'placeholder': 'Artist'}),
-            'link_url': forms.URLInput(attrs={'placeholder': 'Track URL'}),
-        }
 
 
 class CommentForm(StyledFormMixin, forms.ModelForm):
@@ -107,11 +89,7 @@ class CommentForm(StyledFormMixin, forms.ModelForm):
         model = Comment
         fields = ['text']
         widgets = {
-            'text': forms.Textarea(attrs={
-                'rows': 3,
-                'class': 'form-textarea',
-                'placeholder': 'Your comment...',
-            }),
+            'text': forms.Textarea(attrs={'rows': 3, 'class': 'form-textarea'}),
         }
 
 
@@ -122,3 +100,22 @@ class BulkChaptersForm(StyledFormMixin, forms.Form):
         label='Number of chapters',
         widget=forms.NumberInput(attrs={'placeholder': '10'}),
     )
+
+
+class AuthorVerificationForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = AuthorVerification
+        fields = ['proof_document', 'proof_authorship', 'publisher_url', 'additional_notes']
+        widgets = {
+            'additional_notes': forms.Textarea(attrs={'rows': 4, 'class': 'form-textarea'}),
+            'publisher_url': forms.URLInput(attrs={'placeholder': 'https://publisher.com/book/...'}),
+        }
+
+
+class BookRatingForm(forms.ModelForm):
+    class Meta:
+        model = BookRating
+        fields = ['score']
+        widgets = {
+            'score': forms.HiddenInput(),
+        }

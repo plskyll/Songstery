@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Page Not Found — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                min-height:60vh;padding:60px 36px;text-align:center;">
+        <p style="font-family:var(--ff-display);font-size:80px;font-weight:600;
+                  color:var(--clr-border);line-height:1;margin-bottom:16px;">404</p>
+        <h1 style="font-family:var(--ff-display);font-size:26px;font-weight:600;
+                   color:var(--clr-ink);margin-bottom:10px;">Page not found</h1>
+        <p style="font-size:var(--text-base);color:var(--clr-muted);max-width:360px;
+                  margin-bottom:32px;">
+            Looks like this page has gone quiet. Maybe it never existed, or was moved.
+        </p>
+        <a href="{% url 'core:home' %}" class="btn btn-accent">Back to Discover</a>
+    </div>
+{% endblock %}

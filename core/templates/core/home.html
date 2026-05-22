@@ -6,6 +6,7 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/pages/home.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components/comments.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -17,8 +18,7 @@
                 The reading soundtrack
             </div>
             <h1 class="hero__title">Find the <em>perfect music</em> for every chapter</h1>
-            <p class="hero__sub">Discover community-curated music that matches the mood of your favorite books — chapter
-                by chapter.</p>
+            <p class="hero__sub">Discover community-curated music that matches the mood of your favorite books — chapter by chapter.</p>
             <div class="flex gap-12">
                 <a href="#catalog" class="btn btn-accent btn-lg">Browse Books</a>
                 <a href="{% url 'signup' %}" class="btn btn-ghost btn-lg">Join Free</a>
@@ -76,6 +76,16 @@
             </div>
         {% endif %}
 
+        <div class="sort-bar">
+            <span class="sort-bar__label">Sort</span>
+            {% for slug, label in sort_options %}
+                <a href="?sort={{ slug }}{% if search_query %}&search={{ search_query }}{% endif %}{% if active_genre %}&genre={{ active_genre }}{% endif %}"
+                   class="sort-btn {% if current_sort == slug %}sort-btn--active{% endif %}">
+                    {{ label }}
+                </a>
+            {% endfor %}
+        </div>
+
         {% if db_books %}
             <div class="books-grid">
                 {% for book in db_books %}
@@ -86,16 +96,14 @@
             {% if page_obj.has_other_pages %}
                 <div class="pagination">
                     {% if page_obj.has_previous %}
-                        <a href="?page=
-                                {{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if active_genre %}&genre={{ active_genre }}{% endif %}"
+                        <a href="?page={{ page_obj.previous_page_number }}&sort={{ current_sort }}{% if search_query %}&search={{ search_query }}{% endif %}{% if active_genre %}&genre={{ active_genre }}{% endif %}"
                            class="btn btn-ghost btn-sm">
                             <i data-lucide="arrow-left" style="width:13px;height:13px;"></i> Previous
                         </a>
                     {% endif %}
                     <span class="pagination__info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
                     {% if page_obj.has_next %}
-                        <a href="?page=
-                                {{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if active_genre %}&genre={{ active_genre }}{% endif %}"
+                        <a href="?page={{ page_obj.next_page_number }}&sort={{ current_sort }}{% if search_query %}&search={{ search_query }}{% endif %}{% if active_genre %}&genre={{ active_genre }}{% endif %}"
                            class="btn btn-ghost btn-sm">
                             Next <i data-lucide="arrow-right" style="width:13px;height:13px;"></i>
                         </a>
@@ -110,11 +118,8 @@
                 </div>
                 <div class="empty-state__title">No books found</div>
                 <p class="empty-state__text">
-                    {% if active_genre %}
-                        No books in "{{ active_genre }}" yet.
-                    {% else %}
-                        Nothing matched your search. Try a different title or author.
-                    {% endif %}
+                    {% if active_genre %}No books in "{{ active_genre }}" yet.
+                    {% else %}Nothing matched your search. Try a different title or author.{% endif %}
                 </p>
                 {% if user.is_authenticated %}
                     <a href="{% url 'core:create_book' %}" class="btn btn-accent mt-16">Add This Book</a>

@@ -1,0 +1,68 @@
+{% load static %}
+<section class="comments-section mt-32">
+    <h3 class="section-head__title mb-16">
+        Comments ({{ comments|length }})
+    </h3>
+
+    {% if user.is_authenticated %}
+        <form method="post" action="{% url 'core:add_comment' %}" class="comment-form mb-24">
+            {% csrf_token %}
+            {% if book_id %}<input type="hidden" name="book_id" value="{{ book_id }}">{% endif %}
+            {% if chapter_id %}<input type="hidden" name="chapter_id" value="{{ chapter_id }}">{% endif %}
+            {% if playlist_id %}<input type="hidden" name="playlist_id" value="{{ playlist_id }}">{% endif %}
+            <div class="form-group" style="margin-bottom:0;">
+                {{ comment_form.text }}
+            </div>
+            <button type="submit" class="btn btn-accent btn-sm mt-8">Post Comment</button>
+        </form>
+    {% else %}
+        <p class="text-sm text-muted mb-16">
+            <a href="{% url 'login' %}" style="color:var(--clr-accent);">Sign in</a> to leave a comment.
+        </p>
+    {% endif %}
+
+    <div class="comments-list">
+        {% for comment in comments %}
+            <div class="comment-card" id="comment-{{ comment.id }}">
+                <div class="comment-card__header">
+                    <span class="user-avatar" style="width:28px;height:28px;font-size:12px;flex-shrink:0;">
+                        {{ comment.user.username|first|upper }}
+                    </span>
+                    <strong class="text-sm">{{ comment.user.username }}</strong>
+                    <span class="text-muted text-xs">{{ comment.created_at|timesince }} ago</span>
+                    {% if user == comment.user or user.is_staff %}
+                        <form method="post" action="{% url 'core:delete_comment' comment.id %}"
+                              style="margin-left:auto;">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn" style="width:24px;height:24px;"
+                                    title="Delete comment">
+                                <i data-lucide="x" style="width:11px;height:11px;"></i>
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+                <p class="comment-card__text">{{ comment.text }}</p>
+
+                {% if comment.replies.exists %}
+                    <div class="comment-replies">
+                        {% for reply in comment.replies.all %}
+                            <div class="comment-card comment-card--reply">
+                                <div class="comment-card__header">
+                                    <span class="user-avatar"
+                                          style="width:22px;height:22px;font-size:10px;flex-shrink:0;">
+                                        {{ reply.user.username|first|upper }}
+                                    </span>
+                                    <strong class="text-sm">{{ reply.user.username }}</strong>
+                                    <span class="text-muted text-xs">{{ reply.created_at|timesince }} ago</span>
+                                </div>
+                                <p class="comment-card__text">{{ reply.text }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p class="text-muted text-sm">No comments yet. Be the first!</p>
+        {% endfor %}
+    </div>
+</section>
