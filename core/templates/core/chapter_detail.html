@@ -13,15 +13,15 @@
     <div class="chapter-detail">
 
         <nav class="breadcrumbs">
-            <a href="{% url 'core:home' %}">Discover</a>
+            <a href="{% url 'core:home' %}">Каталог</a>
             <span class="breadcrumbs__sep">/</span>
             <a href="{% url 'core:book_detail' chapter.book.id %}">{{ chapter.book.title }}</a>
             <span class="breadcrumbs__sep">/</span>
-            <span>Chapter {{ chapter.number }}</span>
+            <span>Розділ {{ chapter.number }}</span>
         </nav>
 
         <div class="chapter-header">
-            <div class="chapter-header__num">Chapter {{ chapter.number }}</div>
+            <div class="chapter-header__num">Розділ {{ chapter.number }}</div>
             <h1 class="chapter-header__title">{{ chapter.title }}</h1>
             {% if chapter.description %}
                 <p class="chapter-header__desc">{{ chapter.description }}</p>
@@ -39,31 +39,31 @@
                 <a href="{% url 'core:chapter_detail' chapter.book.id prev_chapter.number %}"
                    class="btn btn-ghost btn-sm">
                     <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
-                    Chapter {{ prev_chapter.number }}
+                    Розділ {{ prev_chapter.number }}
                 </a>
             {% endif %}
             {% if next_chapter %}
                 <a href="{% url 'core:chapter_detail' chapter.book.id next_chapter.number %}"
                    class="btn btn-ghost btn-sm">
-                    Chapter {{ next_chapter.number }}
+                    Розділ {{ next_chapter.number }}
                     <i data-lucide="arrow-right" style="width:13px;height:13px;"></i>
                 </a>
             {% endif %}
             <a href="{% url 'core:book_detail' chapter.book.id %}" class="btn btn-ghost btn-sm chapter-nav__back">
                 <i data-lucide="book-open" style="width:13px;height:13px;"></i>
-                Back to book
+                До книги
             </a>
         </div>
 
         <div class="music-section__head">
-            <h2 class="music-section__title">Music Recommendations</h2>
+            <h2 class="music-section__title">Музичні рекомендації</h2>
             {% if user.is_authenticated %}
                 <a href="{% url 'core:add_music' chapter.id %}" class="btn btn-accent btn-sm">
                     <i data-lucide="plus" style="width:13px;height:13px;"></i>
-                    Add Music
+                    Додати музику
                 </a>
             {% else %}
-                <a href="{% url 'login' %}" class="btn btn-ghost btn-sm">Sign in to add</a>
+                <a href="{% url 'login' %}" class="btn btn-ghost btn-sm">Увійдіть, щоб додати</a>
             {% endif %}
         </div>
 
@@ -71,7 +71,7 @@
             <div class="author-picks mb-24">
                 <div class="author-picks__header">
                     <i data-lucide="badge-check" style="width:15px;height:15px;color:var(--clr-accent);"></i>
-                    <span>Author's picks</span>
+                    <span>Вибір автора</span>
                     <a href="{% url 'core:author_profile' verified_author.id %}">
                         {{ verified_author.get_full_name|default:verified_author.username }}
                     </a>
@@ -93,10 +93,10 @@
                     <div class="empty-state__icon">
                         <i data-lucide="music" style="width:22px;height:22px;"></i>
                     </div>
-                    <div class="empty-state__title">No music yet</div>
-                    <p class="empty-state__text">Be the first to add a track that matches this chapter's atmosphere.</p>
+                    <div class="empty-state__title">Музики ще немає</div>
+                    <p class="empty-state__text">Будьте першим, хто додасть трек, що передає атмосферу цього розділу.</p>
                     {% if user.is_authenticated %}
-                        <a href="{% url 'core:add_music' chapter.id %}" class="btn btn-accent">Add Music</a>
+                        <a href="{% url 'core:add_music' chapter.id %}" class="btn btn-accent">Додати музику</a>
                     {% endif %}
                 </div>
             {% endif %}
@@ -106,18 +106,22 @@
 
     </div>
 
-    <div id="sticky-player" class="sticky-player player--hidden" role="region" aria-label="Music player">
-        <div class="sticky-player__embed">
-            <iframe id="player-iframe" src="" frameborder="0"
-                    allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-        </div>
-        <div class="sticky-player__info">
-            <div class="sticky-player__track">
-                <span id="player-title" class="sticky-player__title"></span>
-                <span id="player-artist" class="sticky-player__artist"></span>
+    {# Sticky music player #}
+    <div id="sticky-player" class="sticky-player player--hidden" role="region" aria-label="Музичний плеєр">
+        <div id="player-embed-area" class="player__embed"></div>
+        <div class="player__bar">
+            <div id="player-dot" class="player__dot"></div>
+            <div class="player__meta">
+                <span id="player-title" class="player__title"></span>
+                <span id="player-artist" class="player__artist"></span>
             </div>
-            <button id="player-close" class="sticky-player__close" aria-label="Close player">
-                <i data-lucide="x" style="width:16px;height:16px;"></i>
+            <span id="player-platform" class="player__platform"></span>
+            <a id="player-open" href="#" target="_blank" rel="noopener" class="player__open">
+                <i data-lucide="external-link" style="width:11px;height:11px;"></i>
+                Відкрити
+            </a>
+            <button id="player-close" class="player__close" aria-label="Закрити плеєр">
+                <i data-lucide="x" style="width:14px;height:14px;"></i>
             </button>
         </div>
     </div>

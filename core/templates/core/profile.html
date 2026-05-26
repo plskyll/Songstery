@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Profile — {{ SITE_NAME }}{% endblock %}
+{% block title %}Профіль — {{ SITE_NAME }}{% endblock %}
 {% block nav_library %}active{% endblock %}
 
 {% block extra_css %}
@@ -22,7 +22,7 @@
         </div>
 
         <div class="edit-panel">
-            <div class="edit-panel__title">Edit Profile</div>
+            <div class="edit-panel__title">Редагувати профіль</div>
             <form method="post">
                 {% csrf_token %}
                 <div class="form-grid">
@@ -37,20 +37,20 @@
                     {% endfor %}
                 </div>
                 <div class="mt-16">
-                    <button type="submit" class="btn btn-accent btn-sm">Save Changes</button>
+                    <button type="submit" class="btn btn-accent btn-sm">Зберегти</button>
                 </div>
             </form>
         </div>
 
         <div class="tab-bar">
             <button class="tab-btn active" data-tab="saved">
-                Saved Books ({{ saved_books.count }})
+                Збережені ({{ saved_books.count }})
             </button>
             <button class="tab-btn" data-tab="playlists">
-                Playlists ({{ my_playlists.count }})
+                Плейлісти ({{ my_playlists.count }})
             </button>
             <button class="tab-btn" data-tab="music">
-                My Recommendations ({{ my_recommendations.count }})
+                Рекомендації ({{ my_recommendations.count }})
             </button>
         </div>
 
@@ -80,12 +80,10 @@
                 </div>
             {% else %}
                 <div class="empty-state">
-                    <div class="empty-state__icon">
-                        <i data-lucide="bookmark" style="width:22px;height:22px;"></i>
-                    </div>
-                    <div class="empty-state__title">No saved books</div>
-                    <p class="empty-state__text">Browse the catalog and save books you love.</p>
-                    <a href="{% url 'core:home' %}" class="btn btn-accent">Discover Books</a>
+                    <div class="empty-state__icon"><i data-lucide="bookmark" style="width:22px;height:22px;"></i></div>
+                    <div class="empty-state__title">Збережених немає</div>
+                    <p class="empty-state__text">Переглядайте каталог і зберігайте книги, які вам подобаються.</p>
+                    <a href="{% url 'core:home' %}" class="btn btn-accent">Переглянути книги</a>
                 </div>
             {% endif %}
         </div>
@@ -106,11 +104,9 @@
                 {% endfor %}
             {% else %}
                 <div class="empty-state">
-                    <div class="empty-state__icon">
-                        <i data-lucide="music" style="width:22px;height:22px;"></i>
-                    </div>
-                    <div class="empty-state__title">No playlists yet</div>
-                    <p class="empty-state__text">Create playlists for your favorite books.</p>
+                    <div class="empty-state__icon"><i data-lucide="music" style="width:22px;height:22px;"></i></div>
+                    <div class="empty-state__title">Плейлістів ще немає</div>
+                    <p class="empty-state__text">Створіть плейліст для улюбленої книги.</p>
                 </div>
             {% endif %}
         </div>
@@ -118,11 +114,11 @@
         <div class="tab-panel" id="tab-music">
             {% if my_recommendations %}
                 {% for music in my_recommendations %}
-                    <div class="list-item" style="cursor:default;">
+                    <div class="list-item list-item--static">
                         <div>
                             <div class="list-item__title">{{ music.track_title }}</div>
                             <div class="list-item__sub">
-                                {{ music.artist }} · {{ music.chapter.book.title }} — Ch. {{ music.chapter.number }}
+                                {{ music.artist }} · {{ music.chapter.book.title }} — Розд. {{ music.chapter.number }}
                             </div>
                         </div>
                         <div class="list-item__stat">
@@ -133,11 +129,9 @@
                 {% endfor %}
             {% else %}
                 <div class="empty-state">
-                    <div class="empty-state__icon">
-                        <i data-lucide="music" style="width:22px;height:22px;"></i>
-                    </div>
-                    <div class="empty-state__title">No recommendations yet</div>
-                    <p class="empty-state__text">Find a chapter and share what you were listening to.</p>
+                    <div class="empty-state__icon"><i data-lucide="music" style="width:22px;height:22px;"></i></div>
+                    <div class="empty-state__title">Рекомендацій ще немає</div>
+                    <p class="empty-state__text">Знайдіть розділ і поділіться тим, що слухали під час читання.</p>
                 </div>
             {% endif %}
         </div>

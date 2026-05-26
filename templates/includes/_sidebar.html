@@ -2,26 +2,26 @@
     <div class="sidebar__logo">
         <a href="{% url 'core:home' %}">
             <span class="logo-word">{{ SITE_NAME }}</span>
-            <div class="logo-tagline">Books & Music</div>
+            <div class="logo-tagline">Книги та музика</div>
         </a>
     </div>
 
     <nav class="sidebar__nav">
-        <span class="sidebar__section-label">Browse</span>
+        <span class="sidebar__section-label">Огляд</span>
         <a href="{% url 'core:home' %}" class="nav-link {% block nav_discover %}{% endblock %}">
-            <i data-lucide="compass" size="18"></i> Discover
+            <i data-lucide="compass" size="18"></i> Каталог
         </a>
         <a href="{% url 'core:home' %}#catalog" class="nav-link {% block nav_catalog %}{% endblock %}">
-            <i data-lucide="book-open" size="18"></i> Catalog
+            <i data-lucide="book-open" size="18"></i> Книги
         </a>
 
         {% if user.is_authenticated %}
-            <span class="sidebar__section-label">My Space</span>
+            <span class="sidebar__section-label">Мій простір</span>
             <a href="{% url 'core:profile' %}" class="nav-link {% block nav_library %}{% endblock %}">
-                <i data-lucide="library" size="18"></i> My Library
+                <i data-lucide="library" size="18"></i> Бібліотека
             </a>
             <a href="{% url 'core:profile' %}" class="nav-link {% block nav_playlists %}{% endblock %}">
-                <i data-lucide="music" size="18"></i> Playlists
+                <i data-lucide="music" size="18"></i> Плейлісти
             </a>
         {% endif %}
     </nav>
@@ -32,18 +32,18 @@
                 <div class="user-avatar">{{ user.username|first|upper }}</div>
                 <div>
                     <div class="user-name">{{ user.username }}</div>
-                    <div class="user-role">Member</div>
+                    <div class="user-role">Учасник</div>
                 </div>
             </a>
             <form action="{% url 'logout' %}" method="post" class="mt-8">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-ghost btn-sm w-full justify-center">
-                    Sign out
+                    Вийти
                 </button>
             </form>
         {% else %}
-            <a href="{% url 'login' %}" class="btn btn-accent btn-sm w-full justify-center">Sign in</a>
-            <a href="{% url 'signup' %}" class="btn btn-ghost btn-sm w-full justify-center mt-8">Register</a>
+            <a href="{% url 'login' %}" class="btn btn-accent btn-sm w-full justify-center">Увійти</a>
+            <a href="{% url 'signup' %}" class="btn btn-ghost btn-sm w-full justify-center mt-8">Реєстрація</a>
         {% endif %}
     </div>
 </aside>

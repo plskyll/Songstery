@@ -1,21 +1,21 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Add Track — {{ SITE_NAME }}{% endblock %}
+{% block title %}Додати трек — {{ SITE_NAME }}{% endblock %}
 
 {% block content %}
     <div class="form-wrap">
         <nav class="breadcrumbs">
-            <a href="{% url 'core:home' %}">Discover</a>
+            <a href="{% url 'core:home' %}">Каталог</a>
             <span class="breadcrumbs__sep">/</span>
             <a href="{% url 'core:playlist_detail' playlist.id %}">{{ playlist.title }}</a>
             <span class="breadcrumbs__sep">/</span>
-            <span>Add Track</span>
+            <span>Додати трек</span>
         </nav>
 
         <div class="form-box">
-            <div class="form-box__title">Add a track</div>
-            <p class="form-box__subtitle">To "{{ playlist.title }}"</p>
+            <div class="form-box__title">Новий трек</div>
+            <p class="form-box__subtitle">До плейліста "{{ playlist.title }}"</p>
 
             <form method="post">
                 {% csrf_token %}
@@ -30,8 +30,8 @@
                 {% endfor %}
 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-accent">Add Track</button>
-                    <a href="{% url 'core:playlist_detail' playlist.id %}" class="btn btn-ghost">Cancel</a>
+                    <button type="submit" class="btn btn-accent">Додати трек</button>
+                    <a href="{% url 'core:playlist_detail' playlist.id %}" class="btn btn-ghost">Скасувати</a>
                 </div>
             </form>
         </div>

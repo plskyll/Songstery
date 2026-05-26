@@ -13,7 +13,7 @@
     <div class="playlist-detail">
 
         <nav class="breadcrumbs">
-            <a href="{% url 'core:home' %}">Discover</a>
+            <a href="{% url 'core:home' %}">Каталог</a>
             <span class="breadcrumbs__sep">/</span>
             <a href="{% url 'core:book_detail' playlist.book.id %}">{{ playlist.book.title }}</a>
             <span class="breadcrumbs__sep">/</span>
@@ -27,7 +27,7 @@
 
             <div class="playlist-hero__body">
                 <h1 class="playlist-hero__title">{{ playlist.title }}</h1>
-                <div class="playlist-hero__creator">by {{ playlist.creator.username }}</div>
+                <div class="playlist-hero__creator">від {{ playlist.creator.username }}</div>
 
                 {% if playlist.description %}
                     <p class="playlist-hero__desc">{{ playlist.description }}</p>
@@ -36,11 +36,11 @@
                 <div class="playlist-hero__meta">
                     <span class="playlist-hero__meta-item">
                         <i data-lucide="heart" style="width:13px;height:13px;"></i>
-                        {{ playlist.likes_count }} likes
+                        {{ playlist.likes_count }} вподобань
                     </span>
                     <span class="playlist-hero__meta-item">
                         <i data-lucide="calendar" style="width:13px;height:13px;"></i>
-                        {{ playlist.created_at|date:"M j, Y" }}
+                        {{ playlist.created_at|date:"j E Y" }}
                     </span>
                     {% if playlist.mood %}
                         <span class="tag tag--accent">{{ playlist.mood }}</span>
@@ -49,20 +49,18 @@
 
                 <div class="playlist-hero__actions">
                     {% if user.is_authenticated %}
-                        <form method="post" action="{% url 'core:like_playlist' playlist.id %}"
-                              style="display:inline;">
+                        <form method="post" action="{% url 'core:like_playlist' playlist.id %}" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="like-btn {% if is_liked %}liked{% endif %}">
                                 <i data-lucide="heart" style="width:13px;height:13px;"></i>
-                                {% if is_liked %}Liked{% else %}Like{% endif %}
+                                {% if is_liked %}Вподобано{% else %}Вподобати{% endif %}
                             </button>
                         </form>
                     {% endif %}
                     {% if playlist.external_link %}
-                        <a href="{{ playlist.external_link }}" target="_blank" rel="noopener"
-                           class="btn btn-ghost btn-sm">
+                        <a href="{{ playlist.external_link }}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
                             <i data-lucide="external-link" style="width:13px;height:13px;"></i>
-                            Open on Platform
+                            Відкрити на платформі
                         </a>
                     {% endif %}
                 </div>
@@ -71,11 +69,11 @@
 
         <div class="tracks-section">
             <div class="tracks-section__head">
-                <span class="tracks-section__title">Tracks ({{ tracks|length }})</span>
+                <span class="tracks-section__title">Треки ({{ tracks|length }})</span>
                 {% if user == playlist.creator %}
                     <a href="{% url 'core:add_track' playlist.id %}" class="btn btn-ghost btn-sm">
                         <i data-lucide="plus" style="width:13px;height:13px;"></i>
-                        Add Track
+                        Додати трек
                     </a>
                 {% endif %}
             </div>
@@ -88,19 +86,16 @@
                             <div class="track-row__title">{{ track.track_title }}</div>
                             <div class="track-row__artist">{{ track.artist }}</div>
                         </div>
-                        <a href="{{ track.link_url }}" target="_blank" rel="noopener"
-                           class="track-row__play" title="Play">
+                        <a href="{{ track.link_url }}" target="_blank" rel="noopener" class="track-row__play" title="Відтворити">
                             <i data-lucide="play" style="width:14px;height:14px;"></i>
                         </a>
                     </div>
                 {% endfor %}
             {% else %}
                 <div class="tracks-empty">
-                    <p class="text-muted text-sm">No tracks yet.</p>
+                    <p class="text-muted text-sm">Треків ще немає.</p>
                     {% if user == playlist.creator %}
-                        <a href="{% url 'core:add_track' playlist.id %}" class="btn btn-accent btn-sm mt-12">
-                            Add First Track
-                        </a>
+                        <a href="{% url 'core:add_track' playlist.id %}" class="btn btn-accent btn-sm mt-12">Додати перший трек</a>
                     {% endif %}
                 </div>
             {% endif %}

@@ -1,27 +1,28 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Apply for Author Verification — {{ SITE_NAME }}{% endblock %}
+{% block title %}Верифікація автора — {{ SITE_NAME }}{% endblock %}
 
 {% block content %}
     <div class="form-wrap">
         <nav class="breadcrumbs">
-            <a href="{% url 'core:home' %}">Discover</a>
+            <a href="{% url 'core:home' %}">Каталог</a>
             <span class="breadcrumbs__sep">/</span>
             <a href="{% url 'core:book_detail' book.id %}">{{ book.title }}</a>
             <span class="breadcrumbs__sep">/</span>
-            <span>Author Verification</span>
+            <span>Верифікація автора</span>
         </nav>
 
         <div class="form-box">
-            <div class="form-box__title">Claim authorship</div>
+            <div class="form-box__title">Підтвердити авторство</div>
             <p class="form-box__subtitle">
-                Verify that you are the author of <strong>{{ book.title }}</strong>.
-                Your documents are reviewed by our team within 3–5 business days.
+                Верифікуйте, що ви є автором книги <strong>{{ book.title }}</strong>.
+                Документи перевіряються командою впродовж 3–5 робочих днів.
             </p>
 
             <div class="alert alert--info mb-16" style="margin-bottom:20px;">
-                All submitted documents are kept strictly confidential and used only for verification.
+                Усі надані документи зберігаються в суворій конфіденційності і використовуються виключно для
+                верифікації.
             </div>
 
             <form method="post" enctype="multipart/form-data">
@@ -40,8 +41,8 @@
                 {% endfor %}
 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-accent">Submit Application</button>
-                    <a href="{% url 'core:book_detail' book.id %}" class="btn btn-ghost">Cancel</a>
+                    <button type="submit" class="btn btn-accent">Подати заявку</button>
+                    <a href="{% url 'core:book_detail' book.id %}" class="btn btn-ghost">Скасувати</a>
                 </div>
             </form>
         </div>

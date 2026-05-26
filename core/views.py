@@ -46,10 +46,10 @@ _SORT_MAP = {
 }
 
 _SORT_OPTIONS = [
-    ('newest', 'Newest'),
-    ('popular', 'Most viewed'),
-    ('year', 'By year'),
-    ('title', 'A–Z'),
+    ('newest', 'Нові'),
+    ('popular', 'Популярні'),
+    ('year', 'За роком'),
+    ('title', 'А–Я'),
 ]
 
 
@@ -67,7 +67,7 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, 'Welcome to Songstory!')
+            messages.success(request, f'Ласкаво просимо до {settings.SITE_NAME}!')
             return redirect('core:home')
     else:
         form = SignUpForm()
@@ -99,11 +99,11 @@ class HomeView(TemplateView):
         books_qs = books_qs.order_by(_SORT_MAP.get(current_sort, '-created_at'))
 
         if search_query:
-            section_title = f'Search results: "{search_query}"'
+            section_title = f'Результати: "{search_query}"'
         elif active_genre:
             section_title = active_genre
         else:
-            section_title = 'All Books'
+            section_title = 'Усі книги'
 
         paginator = Paginator(books_qs, 8)
         page_obj = paginator.get_page(self.request.GET.get('page'))
@@ -168,7 +168,7 @@ class BookDetailView(DetailView):
             context['is_owner'] = is_privileged
             context['user_rating'] = BookRating.objects.filter(
                 user=user, book=book
-            ).values_list('score', flat=True).first()
+            ).values_list('score', flat=True).first() or 0
             context['can_apply_author'] = not AuthorVerification.objects.filter(
                 user=user, book=book
             ).exists()
@@ -271,13 +271,11 @@ def author_profile(request, user_id):
         raise Http404
 
     authored_books = Book.objects.filter(verified_author=author_user)
-
-    is_following = False
     followers_count = author_user.followers.count()
-    if request.user.is_authenticated:
-        is_following = Follow.objects.filter(
-            follower=request.user, following=author_user
-        ).exists()
+    is_following = (
+            request.user.is_authenticated
+            and Follow.objects.filter(follower=request.user, following=author_user).exists()
+    )
 
     return render(request, 'core/author_profile.html', {
         'author': author_user,
@@ -293,7 +291,7 @@ def apply_author_verification(request, book_id):
 
     existing = AuthorVerification.objects.filter(user=request.user, book=book).first()
     if existing:
-        messages.info(request, f'Your application is already {existing.get_status_display().lower()}.')
+        messages.info(request, f'Ваша заявка вже має статус: {existing.get_status_display().lower()}.')
         return redirect('core:book_detail', pk=book_id)
 
     if request.method == 'POST':
@@ -303,10 +301,7 @@ def apply_author_verification(request, book_id):
             verification.user = request.user
             verification.book = book
             verification.save()
-            messages.success(
-                request,
-                'Application submitted. We will review it within 3–5 business days.',
-            )
+            messages.success(request, 'Заявку подано. Ми розглянемо її впродовж 3–5 робочих днів.')
             return redirect('core:book_detail', pk=book_id)
     else:
         form = AuthorVerificationForm()
@@ -337,7 +332,7 @@ def rate_book(request, book_id):
     except (TypeError, ValueError):
         score = 0
     if not 1 <= score <= 5:
-        messages.error(request, 'Rating must be between 1 and 5.')
+        messages.error(request, 'Оцінка має бути від 1 до 5.')
         return redirect('core:book_detail', pk=book_id)
     BookRating.objects.update_or_create(
         user=request.user,
@@ -398,7 +393,7 @@ def add_comment(request):
     playlist_id = request.POST.get('playlist_id')
 
     if not any([book_id, chapter_id, playlist_id]):
-        messages.error(request, 'Comment must be attached to a book, chapter, or playlist.')
+        messages.error(request, 'Коментар має бути прив\'язаний до книги, розділу або плейліста.')
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
     comment = form.save(commit=False)
@@ -437,8 +432,8 @@ def create_book(request):
             book = form.save(commit=False)
             book.creator = request.user
             book.save()
-            Chapter.objects.create(book=book, number=1, title='Chapter 1', is_approved=True)
-            messages.success(request, 'Book added successfully.')
+            Chapter.objects.create(book=book, number=1, title='Розділ 1', is_approved=True)
+            messages.success(request, 'Книгу успішно додано.')
             return redirect('core:book_detail', pk=book.pk)
     else:
         form = BookForm()
@@ -451,9 +446,9 @@ def save_book(request, book_id):
     saved, created = SavedBook.objects.get_or_create(user=request.user, book=book)
     if not created:
         saved.delete()
-        messages.success(request, 'Book removed from saved.')
+        messages.success(request, 'Книгу видалено зі збережених.')
     else:
-        messages.success(request, 'Book saved.')
+        messages.success(request, 'Книгу збережено.')
     return redirect('core:book_detail', pk=book_id)
 
 
@@ -473,16 +468,16 @@ def add_chapters(request, book_id):
                 Chapter(
                     book=book,
                     number=start_num + i,
-                    title=f'Chapter {start_num + i}',
+                    title=f'Розділ {start_num + i}',
                     is_approved=is_owner,
                 )
                 for i in range(count)
             ])
 
             if is_owner:
-                messages.success(request, f'{count} chapters added.')
+                messages.success(request, f'Додано {count} розділів.')
             else:
-                messages.warning(request, f'{count} chapters submitted for review.')
+                messages.warning(request, f'{count} розділів подано на перевірку.')
 
             return redirect('core:book_detail', pk=book.pk)
     else:
@@ -501,7 +496,7 @@ def add_music_recommendation(request, chapter_id):
             music.chapter = chapter
             music.user = request.user
             music.save()
-            messages.success(request, 'Recommendation added.')
+            messages.success(request, 'Рекомендацію додано.')
             return redirect('core:chapter_detail', book_id=chapter.book.id, chapter_num=chapter.number)
     else:
         form = MusicRecommendationForm()
@@ -537,7 +532,7 @@ def delete_music(request, music_id):
     if music.user == request.user or request.user.is_staff:
         url = music.chapter.get_absolute_url()
         music.delete()
-        messages.success(request, 'Recommendation removed.')
+        messages.success(request, 'Рекомендацію видалено.')
         return redirect(url)
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -555,7 +550,7 @@ def create_playlist(request, book_id):
             if chapter_id:
                 playlist.chapter_id = chapter_id
             playlist.save()
-            messages.success(request, 'Playlist created.')
+            messages.success(request, 'Плейліст створено.')
             return redirect('core:playlist_detail', pk=playlist.pk)
     else:
         form = PlaylistForm()
@@ -572,7 +567,7 @@ def add_track_to_playlist(request, pk):
     playlist = get_object_or_404(Playlist, pk=pk)
 
     if request.user != playlist.creator:
-        messages.error(request, 'Only the playlist creator can add tracks.')
+        messages.error(request, 'Лише автор плейліста може додавати треки.')
         return redirect('core:playlist_detail', pk=pk)
 
     if request.method == 'POST':
@@ -583,7 +578,7 @@ def add_track_to_playlist(request, pk):
             last = playlist.tracks.order_by('-order').first()
             track.order = (last.order + 1) if last else 1
             track.save()
-            messages.success(request, 'Track added.')
+            messages.success(request, 'Трек додано.')
             return redirect('core:playlist_detail', pk=pk)
     else:
         form = PlaylistTrackForm()
@@ -611,7 +606,7 @@ def profile(request):
         form = UserUpdateForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Profile updated.')
+            messages.success(request, 'Профіль оновлено.')
             return redirect('core:profile')
     else:
         form = UserUpdateForm(instance=request.user)

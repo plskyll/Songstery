@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Register — {{ SITE_NAME }}{% endblock %}
+{% block title %}Реєстрація — {{ SITE_NAME }}{% endblock %}
 
 {% block content %}
     <div class="form-wrap">
         <div class="form-box">
-            <div class="form-box__title">Join {{ SITE_NAME }}</div>
-            <p class="form-box__subtitle">Create your free account and start sharing music</p>
+            <div class="form-box__title">Приєднатись до {{ SITE_NAME }}</div>
+            <p class="form-box__subtitle">Створіть безкоштовний акаунт і починайте ділитись музикою</p>
 
             <form method="post">
                 {% csrf_token %}
@@ -25,13 +25,13 @@
                 {% endfor %}
 
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-accent">Create Account</button>
+                    <button type="submit" class="btn btn-accent">Створити акаунт</button>
                 </div>
             </form>
 
             <p class="text-sm text-muted mt-16" style="text-align:center;">
-                Already have an account?
-                <a href="{% url 'login' %}" style="color:var(--clr-accent); font-weight:500;">Sign in</a>
+                Вже є акаунт?
+                <a href="{% url 'login' %}" style="color:var(--clr-accent); font-weight:500;">Увійти</a>
             </p>
         </div>
     </div>
