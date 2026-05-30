@@ -1,13 +1,38 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
+    <meta name="description"
+          content="{% block meta_description %}Знаходь музику до кожного розділу улюбленої книги — разом зі спільнотою читачів.{% endblock %}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ SITE_NAME }}">
+    <meta property="og:title" content="{% block og_title %}{{ SITE_NAME }}{% endblock %}">
+    <meta property="og:description"
+          content="{% block og_description %}Знаходь музику до кожного розділу улюбленої книги — разом зі спільнотою читачів.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ SITE_NAME }}{% endblock %}">
+    <meta name="twitter:description"
+          content="{% block twitter_description %}Знаходь музику до кожного розділу улюбленої книги.{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{% endblock %}">
+
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#C4622D">
+    <link rel="apple-touch-icon" href="{% static 'core/icons/icon-192.png' %}">
 
     <link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
+
+    {% if PLAUSIBLE_DOMAIN %}
+        <script defer data-domain="{{ PLAUSIBLE_DOMAIN }}" src="https://plausible.io/js/script.js"></script>
+    {% endif %}
 
     <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
     {% block extra_css %}{% endblock %}
@@ -31,7 +56,12 @@
 
 <script src="{% static 'core/js/main.js' %}"></script>
 <script src="{% static 'core/js/forms.js' %}"></script>
-<script>lucide.createIcons();</script>
+<script>
+    lucide.createIcons();
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+    }
+</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

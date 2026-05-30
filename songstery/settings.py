@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'core.apps.CoreConfig',
 ]
 
@@ -75,8 +76,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'uk'
+TIME_ZONE = 'Europe/Kyiv'
 USE_I18N = True
 USE_TZ = True
 
@@ -95,3 +96,16 @@ LOGIN_URL = 'login'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 YOUTUBE_API_KEY = env('YOUTUBE_API_KEY', default='')
+
+SITE_URL = env('SITE_URL', default='http://localhost:8000')
+
+EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = env.int('EMAIL_PORT', default=587)
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@songstory.com')
+ADMIN_EMAIL = env('ADMIN_EMAIL', default='')
+
+PLAUSIBLE_DOMAIN = env('PLAUSIBLE_DOMAIN', default='')

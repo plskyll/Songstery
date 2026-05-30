@@ -1,0 +1,26 @@
+{
+  "name": "Songstory",
+  "short_name": "Songstory",
+  "description": "Музика до кожного розділу книги",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F4EF",
+  "theme_color": "#C4622D",
+  "lang": "uk",
+  "icons": [
+    {
+      "src": "/static/core/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/core/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["books", "music", "entertainment"]
+}

@@ -9,9 +9,9 @@ class AuthorVerification(models.Model):
     STATUS_REJECTED = 'rejected'
 
     STATUS_CHOICES = [
-        (STATUS_PENDING, 'Pending'),
-        (STATUS_APPROVED, 'Approved'),
-        (STATUS_REJECTED, 'Rejected'),
+        (STATUS_PENDING, 'На розгляді'),
+        (STATUS_APPROVED, 'Схвалено'),
+        (STATUS_REJECTED, 'Відхилено'),
     ]
 
     user = models.OneToOneField(
@@ -26,17 +26,17 @@ class AuthorVerification(models.Model):
     )
     proof_document = models.FileField(
         upload_to='author_proofs/',
-        verbose_name='Identity document',
-        help_text='PDF or image',
+        verbose_name='Документ особи',
+        help_text='PDF або зображення',
     )
     proof_authorship = models.FileField(
         upload_to='author_proofs/',
-        verbose_name='Authorship proof',
-        help_text='Publisher contract, book page, etc.',
+        verbose_name='Підтвердження авторства',
+        help_text='Договір з видавцем, сторінка книги тощо',
     )
     publisher_url = models.URLField(
         blank=True,
-        verbose_name='Official publisher page',
+        verbose_name='Сторінка видавця',
     )
     additional_notes = models.TextField(blank=True)
     status = models.CharField(
@@ -57,13 +57,15 @@ class AuthorVerification(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Author verification'
-        verbose_name_plural = 'Author verifications'
+        verbose_name = 'Верифікація автора'
+        verbose_name_plural = 'Верифікації авторів'
 
     def __str__(self):
-        return f'{self.user.username} -> {self.book.title} ({self.status})'
+        return f'{self.user.username} → {self.book.title} ({self.get_status_display()})'
 
     def approve(self, admin_user, note=''):
+        from core.notifications import notify_author_approved
+
         self.status = self.STATUS_APPROVED
         self.admin_note = note
         self.reviewed_at = timezone.now()
@@ -76,9 +78,15 @@ class AuthorVerification(models.Model):
         self.user.profile.is_verified_author = True
         self.user.profile.save(update_fields=['is_verified_author'])
 
+        notify_author_approved(self)
+
     def reject(self, admin_user, note=''):
+        from core.notifications import notify_author_rejected
+
         self.status = self.STATUS_REJECTED
         self.admin_note = note
         self.reviewed_at = timezone.now()
         self.reviewed_by = admin_user
         self.save()
+
+        notify_author_rejected(self)

@@ -1,12 +1,19 @@
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from core import views as core_views
+from core.sitemaps import BookSitemap, ChapterSitemap
 
 handler404 = 'core.views.page_not_found'
 handler500 = 'core.views.server_error'
+
+sitemaps = {
+    'books': BookSitemap,
+    'chapters': ChapterSitemap,
+}
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -15,6 +22,9 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='core:home'), name='logout'),
     path('signup/', core_views.signup, name='signup'),
+
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path('sw.js', core_views.service_worker, name='service_worker'),
 ]
 
 if settings.DEBUG:

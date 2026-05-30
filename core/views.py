@@ -12,6 +12,8 @@ from django.db.models import Avg, F, Q
 from django.http import Http404, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, TemplateView
+from django.views.static import serve
+from core.notifications import notify_admin_new_verification
 
 from .forms import (
     AuthorVerificationForm,
@@ -301,6 +303,7 @@ def apply_author_verification(request, book_id):
             verification.user = request.user
             verification.book = book
             verification.save()
+            notify_admin_new_verification(verification)
             messages.success(request, 'Заявку подано. Ми розглянемо її впродовж 3–5 робочих днів.')
             return redirect('core:book_detail', pk=book_id)
     else:
@@ -619,3 +622,7 @@ def profile(request):
             user=request.user
         ).select_related('chapter__book'),
     })
+
+def service_worker(request):
+    sw_path = settings.BASE_DIR / 'static' / 'sw.js'
+    return serve(request, 'sw.js', document_root=settings.BASE_DIR / 'static')

@@ -1,0 +1,8 @@
+Нова заявка на верифікацію автора.
+
+Користувач: {{ verification.user.username }} ({{ verification.user.email }})
+Книга: {{ verification.book.title }}
+Дата подачі: {{ verification.submitted_at|date:"d.m.Y H:i" }}
+
+Переглянути в адмін-панелі:
+{{ site_url }}/admin/core/authorverification/{{ verification.id }}/change/

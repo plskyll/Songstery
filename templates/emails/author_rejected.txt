@@ -1,0 +1,10 @@
+Вітаємо, {{ verification.user.username }}.
+
+На жаль, ваша заявка на підтвердження авторства книги "{{ verification.book.title }}" не була схвалена.
+
+{% if verification.admin_note %}Причина: {{ verification.admin_note }}{% endif %}
+
+Якщо у вас є питання — зв'яжіться з нами через сайт.
+
+З повагою,
+Команда {{ site_url|cut:"https://" }}
