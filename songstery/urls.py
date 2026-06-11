@@ -1,9 +1,12 @@
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from django.views.generic.base import RedirectView
+
 from core import views as core_views
 from core.sitemaps import BookSitemap, ChapterSitemap
 
@@ -23,8 +26,11 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='core:home'), name='logout'),
     path('signup/', core_views.signup, name='signup'),
 
+    path('robots.txt', RedirectView.as_view(url=staticfiles_storage.url('robots.txt'))),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('sw.js', core_views.service_worker, name='service_worker'),
+
+    path('googlef1a2b3c4d5e6.html', RedirectView.as_view(url=staticfiles_storage.url('googlef1a2b3c4d5e6.html'))),
 ]
 
 if settings.DEBUG:
