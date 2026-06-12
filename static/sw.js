@@ -1,4 +1,5 @@
-const CACHE_NAME = 'songstory-v1';
+const CACHE_NAME = 'songstory-v2';
+const OFFLINE_URL = '/offline/';
 
 const PRECACHE = [
     '/',
@@ -9,22 +10,28 @@ const PRECACHE = [
     '/static/core/js/likes.js',
     '/static/core/js/player.js',
     '/static/core/js/rating.js',
+    '/static/icons/icon-192.png',
+    '/static/icons/icon-512.png',
 ];
 
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE))
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(PRECACHE))
+            .then(() => self.skipWaiting())
     );
-    self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(keys =>
-            Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-        )
+            Promise.all(
+                keys
+                    .filter(k => k !== CACHE_NAME)
+                    .map(k => caches.delete(k))
+            )
+        ).then(() => self.clients.claim())
     );
-    self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
@@ -34,13 +41,18 @@ self.addEventListener('fetch', event => {
     if (request.method !== 'GET') return;
     if (url.origin !== location.origin) return;
 
-    if (url.pathname.startsWith('/static/')) {
+    if (url.pathname.startsWith('/static/') || url.pathname.startsWith('/media/')) {
         event.respondWith(
-            caches.match(request).then(cached => cached || fetch(request).then(response => {
-                const clone = response.clone();
-                caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-                return response;
-            }))
+            caches.match(request).then(cached => {
+                if (cached) return cached;
+                return fetch(request).then(response => {
+                    if (response.ok) {
+                        const clone = response.clone();
+                        caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+                    }
+                    return response;
+                });
+            })
         );
         return;
     }
@@ -54,6 +66,9 @@ self.addEventListener('fetch', event => {
                 }
                 return response;
             })
-            .catch(() => caches.match(request))
+            .catch(() => {
+                return caches.match(request)
+                    .then(cached => cached || caches.match('/'));
+            })
     );
 });

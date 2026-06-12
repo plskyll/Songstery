@@ -1,18 +1,72 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ book.title }} — {{ book.author }} — {{ SITE_NAME }}{% endblock %}
-{% block meta_description %}{{ book.description|truncatechars:160 }}{% endblock %}
-
-{% block og_title %}{{ book.title }} — {{ book.author }}{% endblock %}
-{% block og_description %}{{ book.description|truncatechars:200 }}{% endblock %}
-{% block og_image %}{% if book.get_cover %}{{ request.scheme }}://{{ request.get_host }}{{ book.get_cover }}
-{% endif %}{% endblock %}
-
+{% block title %}{{ book.title }} — {{ book.author }} | Музичні рекомендації — {{ SITE_NAME }}{% endblock %}
+{% block meta_description %}Музичні рекомендації до книги "{{ book.title }}" (
+    {{ book.author }}{% if book.year %}, {{ book.year }}{% endif %}). {{ book.chapters.count }} розділів з треками від
+    спільноти читачів.{% endblock %}
+{% block meta_keywords %}музика до {{ book.title }}, саундтрек {{ book.title }}, {{ book.author }} музика, музичні
+    рекомендації {{ book.genre }}{% endblock %}
+{% block og_type %}book{% endblock %}
+{% block og_title %}{{ book.title }} — {{ book.author }} | {{ SITE_NAME }}{% endblock %}
+{% block og_description %}
+    {{ book.description|truncatechars:200|default:"Музичні рекомендації до кожного розділу книги від спільноти читачів." }}{% endblock %}
+{% block og_image %}{% if book.get_cover %}{{ request.scheme }}://{{ request.get_host }}{{ book.get_cover }}{% else %}
+    {{ block.super }}{% endif %}{% endblock %}
 {% block twitter_title %}{{ book.title }} — {{ book.author }}{% endblock %}
-{% block twitter_description %}{{ book.description|truncatechars:200 }}{% endblock %}
+{% block twitter_description %}
+    {{ book.description|truncatechars:200|default:"Музичні рекомендації до кожного розділу." }}{% endblock %}
 {% block twitter_image %}{% if book.get_cover %}{{ request.scheme }}://{{ request.get_host }}{{ book.get_cover }}
-{% endif %}{% endblock %}
+{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block canonical %}{{ request.scheme }}://{{ request.get_host }}{% url 'core:book_detail' book.pk %}{% endblock %}
+
+{% block structured_data %}
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "Book",
+          "name": "{{ book.title|escapejs }}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ book.author|escapejs }}"
+  },
+        {% if book.year %}"datePublished": "{{ book.year }}",{% endif %}
+  {% if book.genre %}"genre": "{{ book.genre|escapejs }}",{% endif %}
+  {% if book.description %}"description": "{{ book.description|truncatechars:300|escapejs }}",{% endif %}
+  {% if book.get_cover %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ book.get_cover }}",{% endif %}
+        "url": "{{ request.build_absolute_uri }}",
+  "numberOfPages": {{ chapters|length }},
+  "inLanguage": "uk",
+  "aggregateRating": {% if book.ratings.count %}{
+    "@type": "AggregateRating",
+    "ratingValue": "{{ book.average_rating }}",
+    "reviewCount": "{{ book.ratings.count }}",
+    "bestRating": "5",
+    "worstRating": "1"
+  }{% else %}null{% endif %}
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Каталог",
+              "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'core:home' %}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{{ book.title|escapejs }}",
+      "item": "{{ request.build_absolute_uri }}"
+    }
+  ]
+}
+    </script>
+{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/pages/book.css' %}">
@@ -22,10 +76,10 @@
 {% block content %}
     <div class="book-detail">
 
-        <nav class="breadcrumbs">
+        <nav class="breadcrumbs" aria-label="Навігація">
             <a href="{% url 'core:home' %}">Каталог</a>
-            <span class="breadcrumbs__sep">/</span>
-            <span>{{ book.title }}</span>
+            <span class="breadcrumbs__sep" aria-hidden="true">/</span>
+            <span aria-current="page">{{ book.title }}</span>
         </nav>
 
         <div class="book-hero">
@@ -33,8 +87,9 @@
                 <div class="book-hero__cover">
                     {% with cover=book.get_cover %}
                         {% if cover %}
-                            <img src="{{ cover }}" alt="{{ book.title }}"
-                                 onerror="this.parentElement.innerHTML='<div class=\'cover-placeholder\'>{{ book.title|truncatechars:50 }}</div>'">
+                            <img src="{{ cover }}" alt="Обкладинка книги {{ book.title }} — {{ book.author }}"
+                                 onerror="this.parentElement.innerHTML='<div class=\'cover-placeholder\'>{{ book.title|truncatechars:50 }}</div>'"
+                                 loading="lazy" width="200" height="300">
                         {% else %}
                             <div class="cover-placeholder">{{ book.title }}</div>
                         {% endif %}
@@ -116,7 +171,8 @@
 
                 {% if user.is_authenticated %}
                     <form id="star-rating" method="post" action="{% url 'core:rate_book' book.id %}"
-                          style="margin-top:16px;display:flex;align-items:center;gap:10px;">
+                          style="margin-top:16px;display:flex;align-items:center;gap:10px;"
+                          aria-label="Оцінити книгу">
                         {% csrf_token %}
                         {{ rating_form.score }}
                         <div class="star-rating">
@@ -124,7 +180,7 @@
                                 <button type="button"
                                         class="star-btn {% if user_rating >= forloop.counter %}star-btn--active{% endif %}"
                                         data-value="{{ forloop.counter }}"
-                                        aria-label="Оцінка {{ forloop.counter }}">
+                                        aria-label="Оцінка {{ forloop.counter }} з 5">
                                     <i data-lucide="star" style="width:20px;height:20px;"></i>
                                 </button>
                             {% endfor %}
@@ -210,7 +266,7 @@
             </div>
 
             {% if top_music %}
-                <aside>
+                <aside aria-label="Топ треків">
                     <div class="side-panel">
                         <div class="side-panel__head">
                             <i data-lucide="music" style="width:14px;height:14px;"></i>

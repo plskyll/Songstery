@@ -1,7 +1,84 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ chapter.title }} — {{ chapter.book.title }} — {{ SITE_NAME }}{% endblock %}
+{% block title %}{{ chapter.title }} — Розділ {{ chapter.number }} | {{ chapter.book.title }} —
+    {{ SITE_NAME }}{% endblock %}
+{% block meta_description %}Музичні рекомендації до розділу {{ chapter.number }} "{{ chapter.title }}" книги "
+    {{ chapter.book.title }}" ({{ chapter.book.author }}). {% if chapter.mood_tags %}Настрій: {{ chapter.mood_tags }}.
+{% endif %} Треки від спільноти читачів.{% endblock %}
+{% block meta_keywords %}музика до розділу {{ chapter.number }} {{ chapter.book.title }}, {{ chapter.book.author }}
+    саундтрек, треки під читання{% endblock %}
+{% block og_title %}{{ chapter.title }} — {{ chapter.book.title }} | {{ SITE_NAME }}{% endblock %}
+{% block og_description %}Музичні рекомендації до розділу {{ chapter.number }} книги "{{ chapter.book.title }}
+    ".{% endblock %}
+{% block canonical %}{{ request.scheme }}://{{ request.get_host }}
+    {% url 'core:chapter_detail' chapter.book.pk chapter.number %}{% endblock %}
+
+{% block structured_data %}
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Каталог",
+              "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'core:home' %}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{{ chapter.book.title|escapejs }}",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'core:book_detail' chapter.book.pk %}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Розділ {{ chapter.number }}: {{ chapter.title|escapejs }}",
+      "item": "{{ request.build_absolute_uri }}"
+    }
+  ]
+}
+    </script>
+    {% if other_music or author_music %}
+        <script type="application/ld+json">
+            {
+              "@context": "https://schema.org",
+              "@type": "ItemList",
+              "name": "Музика до розділу {{ chapter.number }} — {{ chapter.title|escapejs }}",
+  "description": "Музичні рекомендації до розділу {{ chapter.number }} книги {{ chapter.book.title|escapejs }}",
+  "numberOfItems": {{ other_music|length|add:author_music|length }},
+  "itemListElement": [
+            {% for music in author_music %}
+                {
+                  "@type": "ListItem",
+                  "position": {{ forloop.counter }},
+      "item": {
+        "@type": "MusicRecording",
+        "name": "{{ music.track_title|escapejs }}",
+        "byArtist": { "@type": "MusicGroup", "name": "{{ music.artist|escapejs }}" },
+        "url": "{{ music.link_url }}"
+      }
+    }{% if not forloop.last or other_music %},{% endif %}
+    {% endfor %}
+    {% for music in other_music %}
+            {
+              "@type": "ListItem",
+              "position": {{ forloop.counter|add:author_music|length }},
+      "item": {
+        "@type": "MusicRecording",
+        "name": "{{ music.track_title|escapejs }}",
+        "byArtist": { "@type": "MusicGroup", "name": "{{ music.artist|escapejs }}" },
+        "url": "{{ music.link_url }}"
+      }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+            ]
+          }
+        </script>
+    {% endif %}
+{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/pages/chapter.css' %}">
@@ -12,12 +89,12 @@
 {% block content %}
     <div class="chapter-detail">
 
-        <nav class="breadcrumbs">
+        <nav class="breadcrumbs" aria-label="Навігація">
             <a href="{% url 'core:home' %}">Каталог</a>
-            <span class="breadcrumbs__sep">/</span>
+            <span class="breadcrumbs__sep" aria-hidden="true">/</span>
             <a href="{% url 'core:book_detail' chapter.book.id %}">{{ chapter.book.title }}</a>
-            <span class="breadcrumbs__sep">/</span>
-            <span>Розділ {{ chapter.number }}</span>
+            <span class="breadcrumbs__sep" aria-hidden="true">/</span>
+            <span aria-current="page">Розділ {{ chapter.number }}</span>
         </nav>
 
         <div class="chapter-header">
@@ -37,14 +114,14 @@
         <div class="chapter-nav">
             {% if prev_chapter %}
                 <a href="{% url 'core:chapter_detail' chapter.book.id prev_chapter.number %}"
-                   class="btn btn-ghost btn-sm">
+                   class="btn btn-ghost btn-sm" rel="prev">
                     <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
                     Розділ {{ prev_chapter.number }}
                 </a>
             {% endif %}
             {% if next_chapter %}
                 <a href="{% url 'core:chapter_detail' chapter.book.id next_chapter.number %}"
-                   class="btn btn-ghost btn-sm">
+                   class="btn btn-ghost btn-sm" rel="next">
                     Розділ {{ next_chapter.number }}
                     <i data-lucide="arrow-right" style="width:13px;height:13px;"></i>
                 </a>
@@ -81,8 +158,7 @@
                 {% endfor %}
             </div>
             {% if other_music %}
-                <hr class="section-divider">
-            {% endif %}
+                <hr class="section-divider">{% endif %}
         {% endif %}
 
         {% for music in other_music %}
@@ -94,7 +170,8 @@
                         <i data-lucide="music" style="width:22px;height:22px;"></i>
                     </div>
                     <div class="empty-state__title">Музики ще немає</div>
-                    <p class="empty-state__text">Будьте першим, хто додасть трек, що передає атмосферу цього розділу.</p>
+                    <p class="empty-state__text">Будьте першим, хто додасть трек, що передає атмосферу цього
+                        розділу.</p>
                     {% if user.is_authenticated %}
                         <a href="{% url 'core:add_music' chapter.id %}" class="btn btn-accent">Додати музику</a>
                     {% endif %}
@@ -106,7 +183,6 @@
 
     </div>
 
-    {# Sticky music player #}
     <div id="sticky-player" class="sticky-player player--hidden" role="region" aria-label="Музичний плеєр">
         <div id="player-embed-area" class="player__embed"></div>
         <div class="player__bar">
@@ -125,7 +201,6 @@
             </button>
         </div>
     </div>
-
 {% endblock %}
 
 {% block extra_js %}

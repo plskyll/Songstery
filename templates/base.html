@@ -3,31 +3,79 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-    <title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
+    <title>{% block title %}{{ SITE_NAME }} — Музика до кожного розділу книги{% endblock %}</title>
     <meta name="description"
-          content="{% block meta_description %}Знаходь музику до кожного розділу улюбленої книги — разом зі спільнотою читачів.{% endblock %}">
+          content="{% block meta_description %}Знаходь музичні рекомендації до кожного розділу улюбленої книги. Спільнота підбирає треки, що передають настрій — розділ за розділом.{% endblock %}">
+    <meta name="keywords"
+          content="{% block meta_keywords %}музичні рекомендації до книг, музика під час читання, саундтрек до книги, треки до розділів, музика до літератури{% endblock %}">
+    <meta name="author" content="{{ SITE_NAME }}">
+    <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
+    <link rel="canonical" href="{% block canonical %}{{ request.build_absolute_uri }}{% endblock %}">
 
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:site_name" content="{{ SITE_NAME }}">
-    <meta property="og:title" content="{% block og_title %}{{ SITE_NAME }}{% endblock %}">
+    <meta property="og:locale" content="uk_UA">
+    <meta property="og:title"
+          content="{% block og_title %}{{ SITE_NAME }} — Музика до кожного розділу книги{% endblock %}">
     <meta property="og:description"
-          content="{% block og_description %}Знаходь музику до кожного розділу улюбленої книги — разом зі спільнотою читачів.{% endblock %}">
-    <meta property="og:image" content="{% block og_image %}{% endblock %}">
+          content="{% block og_description %}Знаходь музичні рекомендації до кожного розділу улюбленої книги.{% endblock %}">
+    <meta property="og:image"
+          content="
+                  {% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/og-default.png' %}{% endblock %}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
 
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{% block twitter_title %}{{ SITE_NAME }}{% endblock %}">
+    <meta name="twitter:site" content="@songstory_ua">
+    <meta name="twitter:title"
+          content="{% block twitter_title %}{{ SITE_NAME }} — Музика до кожного розділу книги{% endblock %}">
     <meta name="twitter:description"
-          content="{% block twitter_description %}Знаходь музику до кожного розділу улюбленої книги.{% endblock %}">
-    <meta name="twitter:image" content="{% block twitter_image %}{% endblock %}">
-    <meta name="google-site-verification" content="CBWczJeT9ziMlqItgMhEbPbtwx4TzWJs1Uere9tGkys"/>
+          content="{% block twitter_description %}Знаходь музику до кожного розділу улюбленої книги — разом зі спільнотою читачів.{% endblock %}">
+    <meta name="twitter:image"
+          content="
+                  {% block twitter_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/og-default.png' %}{% endblock %}">
+
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "{{ SITE_NAME }}",
+      "url": "{{ request.scheme }}://{{ request.get_host }}",
+      "description": "Музичні рекомендації до кожного розділу книги",
+      "inLanguage": "uk",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "{{ request.scheme }}://{{ request.get_host }}/?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    {% block structured_data %}{% endblock %}
 
     <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#C4622D">
-    <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="{{ SITE_NAME }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'icons/icon-152.png' %}">
+    <link rel="apple-touch-icon" sizes="192x192" href="{% static 'icons/icon-192.png' %}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'icons/icon-192.png' %}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{% static 'icons/icon-96.png' %}">
+    <meta name="msapplication-TileImage" content="{% static 'icons/icon-144.png' %}">
+    <meta name="msapplication-TileColor" content="#C4622D">
 
+    <meta name="google-site-verification" content="CBWczJeT9ziMlqItgMhEbPbtwx4TzWJs1Uere9tGkys">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
     <link rel="stylesheet" href="{% static 'core/css/tokens.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
 
@@ -36,6 +84,7 @@
     {% endif %}
 
     <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -46,7 +95,7 @@
     {% include 'includes/_topbar.html' %}
     {% include 'includes/_messages.html' %}
 
-    <main>
+    <main id="main-content">
         {% block content %}{% endblock %}
     </main>
 
@@ -60,7 +109,8 @@
 <script>
     lucide.createIcons();
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js');
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+        });
     }
 </script>
 {% block extra_js %}{% endblock %}
