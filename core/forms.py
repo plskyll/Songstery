@@ -66,6 +66,7 @@ class MusicRecommendationForm(StyledFormMixin, forms.ModelForm):
         fields = ['track_title', 'artist', 'link_type', 'link_url', 'embed_code', 'comment', 'mood']
         widgets = {
             'comment': forms.Textarea(attrs={'rows': 3, 'class': 'form-textarea'}),
+            'embed_code': forms.TextInput(attrs={'readonly': 'readonly'}),
         }
 
 

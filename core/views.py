@@ -54,6 +54,14 @@ _SORT_OPTIONS = [
     ('title', 'А–Я'),
 ]
 
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+
+
+def robots_txt(request):
+    content = render_to_string('robots.txt', {'request': request}, request=request)
+    return HttpResponse(content, content_type='text/plain')
+
 
 def page_not_found(request, exception):
     return render(request, '404.html', status=404)
@@ -346,7 +354,7 @@ def rate_book(request, book_id):
 
 
 def youtube_search(request):
-    query = request.GET.get('q', '').strip()
+    query = request.GET.get('q', '').strip()[:100]  # обмеження довжини запиту
     if len(query) < 3:
         return JsonResponse({'results': []})
 
@@ -369,16 +377,20 @@ def youtube_search(request):
     except Exception:
         return JsonResponse({'error': 'Search failed'}, status=502)
 
-    results = [
-        {
-            'id': item['id']['videoId'],
-            'title': item['snippet']['title'],
-            'channel': item['snippet']['channelTitle'],
-            'thumbnail': item['snippet']['thumbnails']['default']['url'],
-        }
-        for item in data.get('items', [])
-        if item.get('id', {}).get('videoId')
-    ]
+    results = []
+    for item in data.get('items', []):
+        video_id = item.get('id', {}).get('videoId')
+        snippet = item.get('snippet', {})
+        thumbnails = snippet.get('thumbnails', {}).get('default', {})
+        if not video_id:
+            continue
+        results.append({
+            'id': video_id,
+            'title': snippet.get('title', ''),
+            'channel': snippet.get('channelTitle', ''),
+            'thumbnail': thumbnails.get('url', ''),
+        })
+
     return JsonResponse({'results': results})
 
 
@@ -622,6 +634,7 @@ def profile(request):
             user=request.user
         ).select_related('chapter__book'),
     })
+
 
 def service_worker(request):
     sw_path = settings.BASE_DIR / 'static' / 'sw.js'

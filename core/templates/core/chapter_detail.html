@@ -42,18 +42,19 @@
 }
     </script>
     {% if other_music or author_music %}
-        <script type="application/ld+json">
-            {
-              "@context": "https://schema.org",
-              "@type": "ItemList",
-              "name": "Музика до розділу {{ chapter.number }} — {{ chapter.title|escapejs }}",
-  "description": "Музичні рекомендації до розділу {{ chapter.number }} книги {{ chapter.book.title|escapejs }}",
-  "numberOfItems": {{ other_music|length|add:author_music|length }},
-  "itemListElement": [
-            {% for music in author_music %}
+        {% with author_count=author_music|length %}
+            <script type="application/ld+json">
                 {
-                  "@type": "ListItem",
-                  "position": {{ forloop.counter }},
+                  "@context": "https://schema.org",
+                  "@type": "ItemList",
+                  "name": "Музика до розділу {{ chapter.number }} — {{ chapter.title|escapejs }}",
+  "description": "Музичні рекомендації до розділу {{ chapter.number }} книги {{ chapter.book.title|escapejs }}",
+  "numberOfItems": {{ other_music|length|add:author_count }},
+  "itemListElement": [
+                {% for music in author_music %}
+                    {
+                      "@type": "ListItem",
+                      "position": {{ forloop.counter }},
       "item": {
         "@type": "MusicRecording",
         "name": "{{ music.track_title|escapejs }}",
@@ -63,9 +64,9 @@
     }{% if not forloop.last or other_music %},{% endif %}
     {% endfor %}
     {% for music in other_music %}
-            {
-              "@type": "ListItem",
-              "position": {{ forloop.counter|add:author_music|length }},
+                {
+                  "@type": "ListItem",
+                  "position": {{ forloop.counter|add:author_count }},
       "item": {
         "@type": "MusicRecording",
         "name": "{{ music.track_title|escapejs }}",
@@ -74,16 +75,17 @@
       }
     }{% if not forloop.last %},{% endif %}
     {% endfor %}
-            ]
-          }
-        </script>
+                ]
+              }
+            </script>
+        {% endwith %}
     {% endif %}
 {% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/pages/chapter.css' %}">
     <link rel="stylesheet" href="{% static 'core/css/components/comments.css' %}">
-    <link rel="stylesheet" href="{% static 'core/css/components/phase2.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components/extras.css' %}">
 {% endblock %}
 
 {% block content %}

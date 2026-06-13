@@ -23,6 +23,7 @@
           content="{% block og_description %}Знаходь музичні рекомендації до кожного розділу улюбленої книги.{% endblock %}">
     <meta property="og:image"
           content="
+
                   {% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/og-default.png' %}{% endblock %}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -36,6 +37,7 @@
           content="{% block twitter_description %}Знаходь музику до кожного розділу улюбленої книги — разом зі спільнотою читачів.{% endblock %}">
     <meta name="twitter:image"
           content="
+
                   {% block twitter_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/og-default.png' %}{% endblock %}">
 
     <script type="application/ld+json">
@@ -71,7 +73,9 @@
     <meta name="msapplication-TileImage" content="{% static 'icons/icon-144.png' %}">
     <meta name="msapplication-TileColor" content="#C4622D">
 
-    <meta name="google-site-verification" content="CBWczJeT9ziMlqItgMhEbPbtwx4TzWJs1Uere9tGkys">
+    {% if GOOGLE_SITE_VERIFICATION %}
+        <meta name="google-site-verification" content="{{ GOOGLE_SITE_VERIFICATION }}">
+    {% endif %}
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

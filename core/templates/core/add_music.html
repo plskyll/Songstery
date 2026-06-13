@@ -4,7 +4,7 @@
 {% block title %}Додати музику — {{ SITE_NAME }}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'core/css/components/phase2.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/components/extras.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -59,7 +59,8 @@
                 <div class="form-group">
                     <label for="{{ form.embed_code.id_for_label }}">
                         Embed / ID відео
-                        <small style="font-weight:400;color:var(--clr-muted);">(заповнюється автоматично)</small>
+                        <small style="font-weight:400;color:var(--clr-muted);">(заповнюється автоматично після вибору
+                            треку з пошуку)</small>
                     </label>
                     {{ form.embed_code }}
                 </div>

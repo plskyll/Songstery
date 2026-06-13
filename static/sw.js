@@ -1,10 +1,12 @@
-const CACHE_NAME = 'songstory-v2';
+const CACHE_NAME = 'songstory-v3';
 const OFFLINE_URL = '/offline/';
 
 const PRECACHE = [
     '/',
     '/static/core/css/tokens.css',
     '/static/core/css/styles.css',
+    '/static/core/css/author.css',
+    '/static/core/css/components/extras.css',
     '/static/core/js/main.js',
     '/static/core/js/forms.js',
     '/static/core/js/likes.js',
@@ -17,7 +19,10 @@ const PRECACHE = [
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(PRECACHE))
+            .then(cache => Promise.all(
+                PRECACHE.map(url => cache.add(url).catch(() => {
+                }))
+            ))
             .then(() => self.skipWaiting())
     );
 });
@@ -35,7 +40,7 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-    const { request } = event;
+    const {request} = event;
     const url = new URL(request.url);
 
     if (request.method !== 'GET') return;
