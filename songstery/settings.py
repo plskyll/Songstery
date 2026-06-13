@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import environ
+from django.core.cache.backends.redis import RedisCache
 
 env = environ.Env(
     DEBUG=(bool, False)
@@ -70,6 +71,17 @@ if DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
         "SET sql_mode='STRICT_TRANS_TABLES'"
     )
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': env('REDIS_URL', default='redis://127.0.0.1:6379/0'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+    }
+}
+
+RATELIMIT_USE_CACHE = 'default'
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
