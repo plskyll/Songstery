@@ -1,128 +1,225 @@
 from django.contrib import admin
+
 from .models import (
-    Book, Chapter, MusicRecommendation,
-    Playlist, PlaylistTrack, Like, Comment, SavedBook,
-    UserProfile, AuthorVerification, Follow, BookRating,
+    Author, AuthorTranslation, AuthorVerification,
+    Book, BookTranslation, Chapter, ChapterTranslation,
+    Genre, GenreTranslation,
+    Language,
+    MusicRecommendation,
+    Notification,
+    Playlist, PlaylistTrack,
+    Like, Comment, SavedBook,
+    UserProfile,
+    Follow, BookRating,
 )
+
+
+# ── Inline helpers ───────────────────────────────────────────────────────────
+
+class AuthorTranslationInline(admin.TabularInline):
+    model = AuthorTranslation
+    extra = 1
+
+
+class GenreTranslationInline(admin.TabularInline):
+    model = GenreTranslation
+    extra = 1
+
+
+class BookTranslationInline(admin.TabularInline):
+    model = BookTranslation
+    extra = 1
+
+
+class ChapterTranslationInline(admin.TabularInline):
+    model = ChapterTranslation
+    extra = 1
 
 
 class ChapterInline(admin.TabularInline):
     model = Chapter
-    extra = 1
-    fields = ['number', 'title', 'mood_tags', 'is_approved']
+    extra = 0
+    fields = ["number", "is_approved"]
+    show_change_link = True
 
 
 class MusicRecommendationInline(admin.TabularInline):
     model = MusicRecommendation
     extra = 0
-    fields = ['track_title', 'artist', 'link_url', 'mood', 'likes_count']
-    readonly_fields = ['likes_count']
+    fields = ["track_title", "artist", "link_url", "mood", "likes_count"]
+    readonly_fields = ["likes_count"]
 
+
+# ── Language ─────────────────────────────────────────────────────────────────
+
+@admin.register(Language)
+class LanguageAdmin(admin.ModelAdmin):
+    list_display = ["code", "name", "is_active"]
+    list_editable = ["is_active"]
+
+
+# ── Genre ─────────────────────────────────────────────────────────────────────
+
+@admin.register(Genre)
+class GenreAdmin(admin.ModelAdmin):
+    list_display = ["slug"]
+    prepopulated_fields = {"slug": ("slug",)}
+    inlines = [GenreTranslationInline]
+
+
+# ── Author ────────────────────────────────────────────────────────────────────
+
+@admin.register(Author)
+class AuthorAdmin(admin.ModelAdmin):
+    list_display = ["slug", "birth_year", "open_library_id"]
+    search_fields = ["slug", "translations__name"]
+    prepopulated_fields = {"slug": ("slug",)}
+    inlines = [AuthorTranslationInline]
+
+
+# ── Book ──────────────────────────────────────────────────────────────────────
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ['title', 'author', 'year', 'genre', 'is_approved', 'verified_author', 'views_count', 'created_at']
-    list_filter = ['is_approved', 'genre', 'year']
-    search_fields = ['title', 'author']
-    raw_id_fields = ['creator', 'verified_author']
-    actions = ['approve_books', 'reject_books']
-    inlines = [ChapterInline]
+    list_display = ["get_title_uk", "author", "genre", "year", "is_approved", "verified_author", "views_count", "created_at"]
+    list_filter = ["is_approved", "genre", "year"]
+    search_fields = ["translations__title", "author_legacy", "author__translations__name"]
+    raw_id_fields = ["creator", "verified_author", "author", "genre", "canonical_book"]
+    actions = ["approve_books", "reject_books"]
+    inlines = [BookTranslationInline, ChapterInline]
 
-    @admin.action(description='Approve selected books')
+    @admin.display(description="Title (uk)")
+    def get_title_uk(self, obj):
+        return obj.get_title("uk")
+
+    @admin.action(description="Approve selected books")
     def approve_books(self, request, queryset):
         updated = queryset.update(is_approved=True)
-        self.message_user(request, f'{updated} book(s) approved.')
+        self.message_user(request, f"{updated} book(s) approved.")
 
-    @admin.action(description='Reject selected books')
+    @admin.action(description="Reject selected books")
     def reject_books(self, request, queryset):
         updated = queryset.update(is_approved=False)
-        self.message_user(request, f'{updated} book(s) rejected.')
+        self.message_user(request, f"{updated} book(s) rejected.")
 
+
+# ── Chapter ───────────────────────────────────────────────────────────────────
 
 @admin.register(Chapter)
 class ChapterAdmin(admin.ModelAdmin):
-    list_display = ['book', 'number', 'title', 'is_approved', 'mood_tags']
-    list_filter = ['book', 'is_approved']
-    search_fields = ['title', 'book__title']
-    inlines = [MusicRecommendationInline]
+    list_display = ["book", "number", "get_title_uk", "is_approved"]
+    list_filter = ["book", "is_approved"]
+    search_fields = ["translations__title", "book__translations__title"]
+    inlines = [ChapterTranslationInline, MusicRecommendationInline]
 
+    @admin.display(description="Title (uk)")
+    def get_title_uk(self, obj):
+        return obj.get_title("uk")
+
+
+# ── Music ─────────────────────────────────────────────────────────────────────
 
 @admin.register(MusicRecommendation)
 class MusicRecommendationAdmin(admin.ModelAdmin):
-    list_display = ['track_title', 'artist', 'mood', 'chapter', 'user', 'likes_count', 'created_at']
-    list_filter = ['link_type', 'mood', 'created_at']
-    search_fields = ['track_title', 'artist']
+    list_display = ["track_title", "artist", "mood", "chapter", "user", "likes_count", "created_at"]
+    list_filter = ["link_type", "mood", "created_at"]
+    search_fields = ["track_title", "artist"]
 
+
+# ── Playlist ──────────────────────────────────────────────────────────────────
 
 @admin.register(Playlist)
 class PlaylistAdmin(admin.ModelAdmin):
-    list_display = ['title', 'book', 'creator', 'likes_count', 'is_public', 'created_at']
-    list_filter = ['is_public', 'created_at']
+    list_display = ["title", "book", "creator", "likes_count", "is_public", "created_at"]
+    list_filter = ["is_public", "created_at"]
 
 
 @admin.register(PlaylistTrack)
 class PlaylistTrackAdmin(admin.ModelAdmin):
-    list_display = ['playlist', 'track_title', 'artist', 'order']
+    list_display = ["playlist", "track_title", "artist", "order"]
 
+
+# ── Interactions ──────────────────────────────────────────────────────────────
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ['user', 'text_preview', 'created_at']
+    list_display = ["user", "text_preview", "created_at"]
 
-    @admin.display(description='Text')
+    @admin.display(description="Text")
     def text_preview(self, obj):
-        return obj.text[:50] + '...' if len(obj.text) > 50 else obj.text
+        return obj.text[:50] + "..." if len(obj.text) > 50 else obj.text
 
 
 @admin.register(Like)
 class LikeAdmin(admin.ModelAdmin):
-    list_display = ['user', 'music_recommendation', 'playlist', 'created_at']
+    list_display = ["user", "music_recommendation", "playlist", "created_at"]
 
 
 @admin.register(SavedBook)
 class SavedBookAdmin(admin.ModelAdmin):
-    list_display = ['user', 'book', 'created_at']
+    list_display = ["user", "book", "created_at"]
 
+
+# ── Profile ───────────────────────────────────────────────────────────────────
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ['user', 'phone', 'is_verified_author']
-    list_filter = ['is_verified_author']
-    search_fields = ['user__username', 'user__email']
+    list_display = ["user", "phone", "is_verified_author"]
+    list_filter = ["is_verified_author"]
+    search_fields = ["user__username", "user__email"]
 
+
+# ── AuthorVerification ────────────────────────────────────────────────────────
 
 @admin.register(AuthorVerification)
 class AuthorVerificationAdmin(admin.ModelAdmin):
-    list_display = ['user', 'book', 'status', 'submitted_at', 'reviewed_at', 'reviewed_by']
-    list_filter = ['status']
-    readonly_fields = ['submitted_at', 'reviewed_at', 'reviewed_by']
-    search_fields = ['user__username', 'book__title']
-    actions = ['approve_selected', 'reject_selected']
+    list_display = ["user", "book", "status", "submitted_at", "reviewed_at", "reviewed_by"]
+    list_filter = ["status"]
+    readonly_fields = ["submitted_at", "reviewed_at", "reviewed_by"]
+    search_fields = ["user__username", "book__translations__title"]
+    actions = ["approve_selected", "reject_selected"]
 
-    @admin.action(description='Approve selected')
+    @admin.action(description="Approve selected")
     def approve_selected(self, request, queryset):
-        count = 0
-        for verification in queryset.filter(status=AuthorVerification.STATUS_PENDING):
-            verification.approve(admin_user=request.user)
-            count += 1
-        self.message_user(request, f'{count} application(s) approved.')
+        count = sum(
+            1 for v in queryset.filter(status=AuthorVerification.STATUS_PENDING)
+            if not v.approve(admin_user=request.user) or True
+        )
+        self.message_user(request, f"{count} application(s) approved.")
 
-    @admin.action(description='Reject selected')
+    @admin.action(description="Reject selected")
     def reject_selected(self, request, queryset):
-        count = 0
-        for verification in queryset.filter(status=AuthorVerification.STATUS_PENDING):
-            verification.reject(admin_user=request.user, note='Rejected via bulk action.')
-            count += 1
-        self.message_user(request, f'{count} application(s) rejected.')
+        count = sum(
+            1 for v in queryset.filter(status=AuthorVerification.STATUS_PENDING)
+            if not v.reject(admin_user=request.user, note="Rejected via bulk action.") or True
+        )
+        self.message_user(request, f"{count} application(s) rejected.")
 
+
+# ── Follow / Rating ───────────────────────────────────────────────────────────
 
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
-    list_display = ['follower', 'following', 'created_at']
-    search_fields = ['follower__username', 'following__username']
+    list_display = ["follower", "following", "created_at"]
+    search_fields = ["follower__username", "following__username"]
 
 
 @admin.register(BookRating)
 class BookRatingAdmin(admin.ModelAdmin):
-    list_display = ['user', 'book', 'score']
-    list_filter = ['score']
+    list_display = ["user", "book", "score"]
+    list_filter = ["score"]
+
+
+# ── Notification ──────────────────────────────────────────────────────────────
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ["recipient", "type", "is_read", "created_at"]
+    list_filter = ["type", "is_read"]
+    search_fields = ["recipient__username"]
+    actions = ["mark_read"]
+
+    @admin.action(description="Mark selected as read")
+    def mark_read(self, request, queryset):
+        updated = queryset.update(is_read=True)
+        self.message_user(request, f"{updated} notification(s) marked as read.")
