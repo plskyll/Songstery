@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
+    'django_ratelimit',
     'core.apps.CoreConfig',
 ]
 
@@ -109,3 +110,5 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@songstory.com')
 ADMIN_EMAIL = env('ADMIN_EMAIL', default='')
 
 PLAUSIBLE_DOMAIN = env('PLAUSIBLE_DOMAIN', default='')
+
+RATELIMIT_USE_CACHE = 'default'

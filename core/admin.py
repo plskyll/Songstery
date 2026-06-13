@@ -21,11 +21,22 @@ class MusicRecommendationInline(admin.TabularInline):
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ['title', 'author', 'year', 'genre', 'verified_author', 'views_count', 'created_at']
-    list_filter = ['genre', 'year']
+    list_display = ['title', 'author', 'year', 'genre', 'is_approved', 'verified_author', 'views_count', 'created_at']
+    list_filter = ['is_approved', 'genre', 'year']
     search_fields = ['title', 'author']
     raw_id_fields = ['creator', 'verified_author']
+    actions = ['approve_books', 'reject_books']
     inlines = [ChapterInline]
+
+    @admin.action(description='Approve selected books')
+    def approve_books(self, request, queryset):
+        updated = queryset.update(is_approved=True)
+        self.message_user(request, f'{updated} book(s) approved.')
+
+    @admin.action(description='Reject selected books')
+    def reject_books(self, request, queryset):
+        updated = queryset.update(is_approved=False)
+        self.message_user(request, f'{updated} book(s) rejected.')
 
 
 @admin.register(Chapter)
@@ -58,10 +69,9 @@ class PlaylistTrackAdmin(admin.ModelAdmin):
 class CommentAdmin(admin.ModelAdmin):
     list_display = ['user', 'text_preview', 'created_at']
 
+    @admin.display(description='Text')
     def text_preview(self, obj):
         return obj.text[:50] + '...' if len(obj.text) > 50 else obj.text
-
-    text_preview.short_description = 'Text'
 
 
 @admin.register(Like)
@@ -89,23 +99,21 @@ class AuthorVerificationAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'book__title']
     actions = ['approve_selected', 'reject_selected']
 
+    @admin.action(description='Approve selected')
     def approve_selected(self, request, queryset):
         count = 0
         for verification in queryset.filter(status=AuthorVerification.STATUS_PENDING):
             verification.approve(admin_user=request.user)
             count += 1
-        self.message_user(request, f'Approved {count} application(s).')
+        self.message_user(request, f'{count} application(s) approved.')
 
-    approve_selected.short_description = 'Approve selected'
-
+    @admin.action(description='Reject selected')
     def reject_selected(self, request, queryset):
         count = 0
         for verification in queryset.filter(status=AuthorVerification.STATUS_PENDING):
             verification.reject(admin_user=request.user, note='Rejected via bulk action.')
             count += 1
-        self.message_user(request, f'Rejected {count} application(s).')
-
-    reject_selected.short_description = 'Reject selected'
+        self.message_user(request, f'{count} application(s) rejected.')
 
 
 @admin.register(Follow)

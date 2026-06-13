@@ -9,15 +9,16 @@ class AuthorVerification(models.Model):
     STATUS_REJECTED = 'rejected'
 
     STATUS_CHOICES = [
-        (STATUS_PENDING, 'На розгляді'),
-        (STATUS_APPROVED, 'Схвалено'),
-        (STATUS_REJECTED, 'Відхилено'),
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_APPROVED, 'Approved'),
+        (STATUS_REJECTED, 'Rejected'),
     ]
 
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='author_verification',
+        related_name='author_verifications',
+        verbose_name='User',
     )
     book = models.ForeignKey(
         'Book',
@@ -26,18 +27,15 @@ class AuthorVerification(models.Model):
     )
     proof_document = models.FileField(
         upload_to='author_proofs/',
-        verbose_name='Документ особи',
-        help_text='PDF або зображення',
+        verbose_name='Identity document',
+        help_text='PDF or image',
     )
     proof_authorship = models.FileField(
         upload_to='author_proofs/',
-        verbose_name='Підтвердження авторства',
-        help_text='Договір з видавцем, сторінка книги тощо',
+        verbose_name='Authorship proof',
+        help_text='Publisher contract, book page, etc.',
     )
-    publisher_url = models.URLField(
-        blank=True,
-        verbose_name='Сторінка видавця',
-    )
+    publisher_url = models.URLField(blank=True, verbose_name='Official publisher page')
     additional_notes = models.TextField(blank=True)
     status = models.CharField(
         max_length=20,
@@ -57,8 +55,9 @@ class AuthorVerification(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Верифікація автора'
-        verbose_name_plural = 'Верифікації авторів'
+        verbose_name = 'Author verification'
+        verbose_name_plural = 'Author verifications'
+        ordering = ['-submitted_at']
 
     def __str__(self):
         return f'{self.user.username} → {self.book.title} ({self.get_status_display()})'

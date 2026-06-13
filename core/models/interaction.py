@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
 from .book import Book, Chapter
@@ -29,10 +30,27 @@ class Like(models.Model):
         target = self.music_recommendation or self.playlist
         return f'{self.user.username} likes {target}'
 
+    def clean(self):
+        has_track = self.music_recommendation_id is not None
+        has_playlist = self.playlist_id is not None
+
+        if not has_track and not has_playlist:
+            raise ValidationError(
+                'A like must be attached to a track or a playlist.'
+            )
+        if has_track and has_playlist:
+            raise ValidationError(
+                'A like can only be attached to one object at a time.'
+            )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
 
 class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    text = models.TextField()
+    text = models.TextField(verbose_name='Comment')
     book = models.ForeignKey(
         Book, on_delete=models.CASCADE, null=True, blank=True, related_name='comments'
     )

@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import MusicRecommendation, Playlist, Comment, Book, PlaylistTrack, AuthorVerification, BookRating
+from .validators import validate_image_url
 
 
 class StyledFormMixin:
@@ -25,6 +26,12 @@ class BookForm(StyledFormMixin, forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-textarea'}),
             'cover_url': forms.URLInput(attrs={'placeholder': 'https://...'}),
         }
+
+    def clean_cover_url(self):
+        url = self.cleaned_data.get('cover_url', '')
+        if url:
+            validate_image_url(url)
+        return url
 
 
 class SignUpForm(StyledFormMixin, UserCreationForm):

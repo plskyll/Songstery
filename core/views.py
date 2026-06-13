@@ -8,13 +8,15 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
-from django.db.models import Avg, F, Q
+from django.db.models import F, Q
 from django.http import Http404, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
+from django.http import HttpResponse
 from django.views.generic import DetailView, TemplateView
 from django.views.static import serve
-from core.notifications import notify_admin_new_verification
 
+from core.notifications import notify_admin_new_verification
 from .forms import (
     AuthorVerificationForm,
     BookForm,
@@ -39,6 +41,13 @@ from .models import (
     Playlist,
     SavedBook,
 )
+from .rate_limit import (
+    likes_limit,
+    comments_limit,
+    add_music_limit,
+    signup_limit,
+    youtube_search_limit,
+)
 
 _SORT_MAP = {
     'newest': '-created_at',
@@ -48,14 +57,11 @@ _SORT_MAP = {
 }
 
 _SORT_OPTIONS = [
-    ('newest', 'Нові'),
-    ('popular', 'Популярні'),
-    ('year', 'За роком'),
-    ('title', 'А–Я'),
+    ('newest', 'New'),
+    ('popular', 'Popular'),
+    ('year', 'By year'),
+    ('title', 'A–Z'),
 ]
-
-from django.template.loader import render_to_string
-from django.http import HttpResponse
 
 
 def robots_txt(request):
@@ -71,13 +77,18 @@ def server_error(request):
     return render(request, '500.html', status=500)
 
 
+def too_many_requests(request, exception=None):
+    return render(request, '429.html', status=429)
+
+
+@signup_limit
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, f'Ласкаво просимо до {settings.SITE_NAME}!')
+            messages.success(request, f'Welcome to {settings.SITE_NAME}!')
             return redirect('core:home')
     else:
         form = SignUpForm()
@@ -93,8 +104,12 @@ class HomeView(TemplateView):
         search_query = self.request.GET.get('search', '').strip()
         active_genre = self.request.GET.get('genre', '').strip()
         current_sort = self.request.GET.get('sort', 'newest')
+        user = self.request.user
 
-        books_qs = Book.objects.all()
+        if user.is_authenticated and user.is_staff:
+            books_qs = Book.objects.all()
+        else:
+            books_qs = Book.published.all()
 
         if search_query:
             books_qs = books_qs.filter(
@@ -109,11 +124,11 @@ class HomeView(TemplateView):
         books_qs = books_qs.order_by(_SORT_MAP.get(current_sort, '-created_at'))
 
         if search_query:
-            section_title = f'Результати: "{search_query}"'
+            section_title = f'Results: "{search_query}"'
         elif active_genre:
             section_title = active_genre
         else:
-            section_title = 'Усі книги'
+            section_title = 'All books'
 
         paginator = Paginator(books_qs, 8)
         page_obj = paginator.get_page(self.request.GET.get('page'))
@@ -127,7 +142,7 @@ class HomeView(TemplateView):
             'sort_options': _SORT_OPTIONS,
             'books_section_title': section_title,
             'genres': (
-                Book.objects
+                Book.published
                 .exclude(genre='')
                 .values_list('genre', flat=True)
                 .distinct()
@@ -146,6 +161,12 @@ class BookDetailView(DetailView):
     template_name = 'core/book_detail.html'
     context_object_name = 'book'
 
+    def get_object(self):
+        book = get_object_or_404(Book, pk=self.kwargs['pk'])
+        if not book.is_visible_to(self.request.user):
+            raise Http404
+        return book
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         book = self.object
@@ -156,7 +177,9 @@ class BookDetailView(DetailView):
             Book.objects.filter(pk=book.pk).update(views_count=F('views_count') + 1)
             self.request.session[session_key] = True
 
-        is_privileged = user == book.creator or (user.is_authenticated and user.is_staff)
+        is_privileged = user.is_authenticated and (
+            user == book.creator or user.is_staff
+        )
         chapters_qs = book.chapters.all() if is_privileged else book.chapters.filter(is_approved=True)
 
         context.update({
@@ -179,9 +202,18 @@ class BookDetailView(DetailView):
             context['user_rating'] = BookRating.objects.filter(
                 user=user, book=book
             ).values_list('score', flat=True).first() or 0
-            context['can_apply_author'] = not AuthorVerification.objects.filter(
-                user=user, book=book
+
+            has_pending = AuthorVerification.objects.filter(
+                user=user,
+                book=book,
+                status=AuthorVerification.STATUS_PENDING,
             ).exists()
+            has_approved = AuthorVerification.objects.filter(
+                user=user,
+                book=book,
+                status=AuthorVerification.STATUS_APPROVED,
+            ).exists()
+            context['can_apply_author'] = not has_pending and not has_approved
 
         return context
 
@@ -198,7 +230,9 @@ class ChapterDetailView(DetailView):
             number=self.kwargs['chapter_num'],
         )
         user = self.request.user
-        is_privileged = user == chapter.book.creator or (user.is_authenticated and user.is_staff)
+        is_privileged = user.is_authenticated and (
+            user == chapter.book.creator or user.is_staff
+        )
         if not chapter.is_approved and not is_privileged:
             raise Http404
         return chapter
@@ -207,7 +241,9 @@ class ChapterDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         chapter = self.object
         user = self.request.user
-        is_privileged = user == chapter.book.creator or (user.is_authenticated and user.is_staff)
+        is_privileged = user.is_authenticated and (
+            user == chapter.book.creator or user.is_staff
+        )
 
         chapter_qs = Chapter.objects.filter(book=chapter.book)
         if not is_privileged:
@@ -283,8 +319,8 @@ def author_profile(request, user_id):
     authored_books = Book.objects.filter(verified_author=author_user)
     followers_count = author_user.followers.count()
     is_following = (
-            request.user.is_authenticated
-            and Follow.objects.filter(follower=request.user, following=author_user).exists()
+        request.user.is_authenticated
+        and Follow.objects.filter(follower=request.user, following=author_user).exists()
     )
 
     return render(request, 'core/author_profile.html', {
@@ -299,9 +335,22 @@ def author_profile(request, user_id):
 def apply_author_verification(request, book_id):
     book = get_object_or_404(Book, id=book_id)
 
-    existing = AuthorVerification.objects.filter(user=request.user, book=book).first()
-    if existing:
-        messages.info(request, f'Ваша заявка вже має статус: {existing.get_status_display().lower()}.')
+    pending = AuthorVerification.objects.filter(
+        user=request.user,
+        book=book,
+        status=AuthorVerification.STATUS_PENDING,
+    ).first()
+    if pending:
+        messages.info(request, 'Your application is already under review.')
+        return redirect('core:book_detail', pk=book_id)
+
+    approved = AuthorVerification.objects.filter(
+        user=request.user,
+        book=book,
+        status=AuthorVerification.STATUS_APPROVED,
+    ).first()
+    if approved:
+        messages.info(request, 'Your authorship has already been verified.')
         return redirect('core:book_detail', pk=book_id)
 
     if request.method == 'POST':
@@ -312,7 +361,7 @@ def apply_author_verification(request, book_id):
             verification.book = book
             verification.save()
             notify_admin_new_verification(verification)
-            messages.success(request, 'Заявку подано. Ми розглянемо її впродовж 3–5 робочих днів.')
+            messages.success(request, 'Application submitted. We will review it within 3–5 business days.')
             return redirect('core:book_detail', pk=book_id)
     else:
         form = AuthorVerificationForm()
@@ -343,7 +392,7 @@ def rate_book(request, book_id):
     except (TypeError, ValueError):
         score = 0
     if not 1 <= score <= 5:
-        messages.error(request, 'Оцінка має бути від 1 до 5.')
+        messages.error(request, 'Rating must be between 1 and 5.')
         return redirect('core:book_detail', pk=book_id)
     BookRating.objects.update_or_create(
         user=request.user,
@@ -353,8 +402,9 @@ def rate_book(request, book_id):
     return redirect('core:book_detail', pk=book_id)
 
 
+@youtube_search_limit
 def youtube_search(request):
-    query = request.GET.get('q', '').strip()[:100]  # обмеження довжини запиту
+    query = request.GET.get('q', '').strip()[:100]
     if len(query) < 3:
         return JsonResponse({'results': []})
 
@@ -395,6 +445,7 @@ def youtube_search(request):
 
 
 @login_required
+@comments_limit
 def add_comment(request):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
@@ -408,7 +459,7 @@ def add_comment(request):
     playlist_id = request.POST.get('playlist_id')
 
     if not any([book_id, chapter_id, playlist_id]):
-        messages.error(request, 'Коментар має бути прив\'язаний до книги, розділу або плейліста.')
+        messages.error(request, 'A comment must be attached to a book, chapter or playlist.')
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
     comment = form.save(commit=False)
@@ -447,8 +498,8 @@ def create_book(request):
             book = form.save(commit=False)
             book.creator = request.user
             book.save()
-            Chapter.objects.create(book=book, number=1, title='Розділ 1', is_approved=True)
-            messages.success(request, 'Книгу успішно додано.')
+            Chapter.objects.create(book=book, number=1, title='Chapter 1', is_approved=True)
+            messages.success(request, 'Book added successfully. It will appear in the catalog once approved.')
             return redirect('core:book_detail', pk=book.pk)
     else:
         form = BookForm()
@@ -461,9 +512,9 @@ def save_book(request, book_id):
     saved, created = SavedBook.objects.get_or_create(user=request.user, book=book)
     if not created:
         saved.delete()
-        messages.success(request, 'Книгу видалено зі збережених.')
+        messages.success(request, 'Book removed from saved.')
     else:
-        messages.success(request, 'Книгу збережено.')
+        messages.success(request, 'Book saved.')
     return redirect('core:book_detail', pk=book_id)
 
 
@@ -477,22 +528,22 @@ def add_chapters(request, book_id):
             count = form.cleaned_data['number_of_chapters']
             last_chapter = book.chapters.order_by('-number').first()
             start_num = (last_chapter.number + 1) if last_chapter else 1
-            is_owner = (request.user == book.creator) or request.user.is_staff
+            is_owner = request.user == book.creator or request.user.is_staff
 
             Chapter.objects.bulk_create([
                 Chapter(
                     book=book,
                     number=start_num + i,
-                    title=f'Розділ {start_num + i}',
+                    title=f'Chapter {start_num + i}',
                     is_approved=is_owner,
                 )
                 for i in range(count)
             ])
 
             if is_owner:
-                messages.success(request, f'Додано {count} розділів.')
+                messages.success(request, f'{count} chapters added.')
             else:
-                messages.warning(request, f'{count} розділів подано на перевірку.')
+                messages.warning(request, f'{count} chapters submitted for review.')
 
             return redirect('core:book_detail', pk=book.pk)
     else:
@@ -502,6 +553,7 @@ def add_chapters(request, book_id):
 
 
 @login_required
+@add_music_limit
 def add_music_recommendation(request, chapter_id):
     chapter = get_object_or_404(Chapter, id=chapter_id)
     if request.method == 'POST':
@@ -511,7 +563,7 @@ def add_music_recommendation(request, chapter_id):
             music.chapter = chapter
             music.user = request.user
             music.save()
-            messages.success(request, 'Рекомендацію додано.')
+            messages.success(request, 'Recommendation added.')
             return redirect('core:chapter_detail', book_id=chapter.book.id, chapter_num=chapter.number)
     else:
         form = MusicRecommendationForm()
@@ -519,6 +571,7 @@ def add_music_recommendation(request, chapter_id):
 
 
 @login_required
+@likes_limit
 def like_music(request, music_id):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
@@ -547,7 +600,7 @@ def delete_music(request, music_id):
     if music.user == request.user or request.user.is_staff:
         url = music.chapter.get_absolute_url()
         music.delete()
-        messages.success(request, 'Рекомендацію видалено.')
+        messages.success(request, 'Recommendation deleted.')
         return redirect(url)
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -565,7 +618,7 @@ def create_playlist(request, book_id):
             if chapter_id:
                 playlist.chapter_id = chapter_id
             playlist.save()
-            messages.success(request, 'Плейліст створено.')
+            messages.success(request, 'Playlist created.')
             return redirect('core:playlist_detail', pk=playlist.pk)
     else:
         form = PlaylistForm()
@@ -582,7 +635,7 @@ def add_track_to_playlist(request, pk):
     playlist = get_object_or_404(Playlist, pk=pk)
 
     if request.user != playlist.creator:
-        messages.error(request, 'Лише автор плейліста може додавати треки.')
+        messages.error(request, 'Only the playlist creator can add tracks.')
         return redirect('core:playlist_detail', pk=pk)
 
     if request.method == 'POST':
@@ -593,7 +646,7 @@ def add_track_to_playlist(request, pk):
             last = playlist.tracks.order_by('-order').first()
             track.order = (last.order + 1) if last else 1
             track.save()
-            messages.success(request, 'Трек додано.')
+            messages.success(request, 'Track added.')
             return redirect('core:playlist_detail', pk=pk)
     else:
         form = PlaylistTrackForm()
@@ -602,6 +655,7 @@ def add_track_to_playlist(request, pk):
 
 
 @login_required
+@likes_limit
 def like_playlist(request, playlist_id):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
@@ -621,7 +675,7 @@ def profile(request):
         form = UserUpdateForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Профіль оновлено.')
+            messages.success(request, 'Profile updated.')
             return redirect('core:profile')
     else:
         form = UserUpdateForm(instance=request.user)
@@ -637,5 +691,4 @@ def profile(request):
 
 
 def service_worker(request):
-    sw_path = settings.BASE_DIR / 'static' / 'sw.js'
     return serve(request, 'sw.js', document_root=settings.BASE_DIR / 'static')
