@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.models import Like, Playlist, PlaylistTrack
-from ..serializers import PlaylistSerializer, PlaylistTrackSerializer
+from api.v1.serializers.music import PlaylistSerializer, PlaylistTrackSerializer
 
 
 class PlaylistDetailView(APIView):
@@ -26,14 +26,10 @@ class PlaylistLikeView(APIView):
         playlist = get_object_or_404(Playlist, slug=slug)
         like, created = Like.objects.get_or_create(user=request.user, playlist=playlist)
         if created:
-            Playlist.objects.filter(pk=playlist.pk).update(
-                likes_count=F("likes_count") + 1
-            )
+            Playlist.objects.filter(pk=playlist.pk).update(likes_count=F("likes_count") + 1)
         else:
             like.delete()
-            Playlist.objects.filter(pk=playlist.pk).update(
-                likes_count=F("likes_count") - 1
-            )
+            Playlist.objects.filter(pk=playlist.pk).update(likes_count=F("likes_count") - 1)
         playlist.refresh_from_db(fields=["likes_count"])
         return Response({"liked": created, "likes_count": playlist.likes_count})
 

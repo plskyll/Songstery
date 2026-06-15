@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.models import Chapter, Like, MusicRecommendation
-from ..serializers import ChapterDetailSerializer, MusicRecommendationSerializer
+from api.v1.serializers.chapter import ChapterDetailSerializer
+from api.v1.serializers.music import MusicRecommendationSerializer
 
 
 class ChapterDetailView(APIView):
@@ -17,7 +18,7 @@ class ChapterDetailView(APIView):
         chapter = get_object_or_404(Chapter, pk=pk)
         user = request.user
         is_privileged = user.is_authenticated and (
-            user == chapter.book.creator or user.is_staff
+                user == chapter.book.creator or user.is_staff
         )
         if not chapter.is_approved and not is_privileged:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -47,14 +48,10 @@ class MusicLikeView(APIView):
             user=request.user, music_recommendation=music
         )
         if created:
-            MusicRecommendation.objects.filter(pk=pk).update(
-                likes_count=F("likes_count") + 1
-            )
+            MusicRecommendation.objects.filter(pk=pk).update(likes_count=F("likes_count") + 1)
         else:
             like.delete()
-            MusicRecommendation.objects.filter(pk=pk).update(
-                likes_count=F("likes_count") - 1
-            )
+            MusicRecommendation.objects.filter(pk=pk).update(likes_count=F("likes_count") - 1)
         music.refresh_from_db(fields=["likes_count"])
         return Response({"liked": created, "likes_count": music.likes_count})
 

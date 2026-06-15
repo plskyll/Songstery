@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -6,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.models import Author, Follow
-from ..serializers import AuthorSerializer
+from api.v1.serializers.author import AuthorSerializer
 
 
 class AuthorDetailView(APIView):
@@ -18,10 +19,18 @@ class AuthorDetailView(APIView):
         data = serializer.data
 
         if request.user.is_authenticated:
-            data["is_following"] = Follow.objects.filter(
-                follower=request.user,
-                following__profile__isnull=False,
-            ).exists()
+            book_with_author = (
+                author.books.filter(verified_author__isnull=False)
+                .select_related("verified_author")
+                .first()
+            )
+            target = book_with_author.verified_author if book_with_author else None
+            data["is_following"] = (
+                Follow.objects.filter(follower=request.user, following=target).exists()
+                if target
+                else False
+            )
+
         data["followers_count"] = 0
         return Response(data)
 
@@ -31,20 +40,19 @@ class AuthorFollowView(APIView):
 
     def post(self, request: Request, slug: str) -> Response:
         author = get_object_or_404(Author, slug=slug)
-        target_user = (
-            author.books.select_related("verified_author")
-            .filter(verified_author__isnull=False)
-            .values_list("verified_author", flat=True)
+
+        book_with_author = (
+            author.books.filter(verified_author__isnull=False)
+            .select_related("verified_author")
             .first()
         )
-        if target_user is None:
+        if not book_with_author:
             return Response(
                 {"detail": "This author has no verified user account."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        from django.contrib.auth.models import User
-        target = get_object_or_404(User, pk=target_user)
+        target: User = book_with_author.verified_author
 
         if target == request.user:
             return Response(

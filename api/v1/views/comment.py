@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.models import Comment
-from ..serializers import CommentSerializer
+from api.v1.serializers.comment import CommentSerializer
 
 
 class CommentCreateView(APIView):
